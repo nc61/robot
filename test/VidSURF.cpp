@@ -12,8 +12,6 @@
 
 using namespace cv;
 
-void readme();
-
 ros::Publisher objectRecPub;
 
 int main( int argc, char** argv )
@@ -22,17 +20,11 @@ int main( int argc, char** argv )
    ros::NodeHandle nh;
    objectRecPub = nh.advertise<robot::object>("object_data", 1);
 
-    if( argc != 2 )
-    { 
-        readme(); 
-        return -1; 
-    }
-
     int minHessian = 500;
     Mat frame;
     Mat img_scene;
     Mat img_object;
-    img_object = imread( argv[1], CV_LOAD_IMAGE_GRAYSCALE );
+    img_object = imread("/home/linaro/img/dew.bmp", CV_LOAD_IMAGE_GRAYSCALE );
     
     if(!img_object.data)
     { 
@@ -70,7 +62,7 @@ int main( int argc, char** argv )
     obj_corners[2] = cvPoint(img_object.cols, img_object.rows); 
     obj_corners[3] = cvPoint(0, img_object.rows);
 
-    while(1){
+    while(ros::ok()){
 
         //Capture frame, then extract key points and descriptors
         capture >> frame;
@@ -95,7 +87,6 @@ int main( int argc, char** argv )
             std::vector<DMatch> matches;
             matcher.match(descriptors_object, descriptors_scene, matches);
             
-            std::cout << "time: " << time(NULL)  << std::endl;
             //Calculate minimum and maximum distances    
             double max_dist = 0; 
             double min_dist = 100;
@@ -150,10 +141,13 @@ int main( int argc, char** argv )
                float xCenter = (scene_corners[0].x + scene_corners[2].x)/2;
                float area = abs(scene_corners[0].x - scene_corners[2].x)*abs(scene_corners[0].y - scene_corners[3].y);
 
-               robot::object msg;
-               msg.xpos = xCenter;
-               msg.area = area;
-               objectRecPub.publish(msg);
+	       if ((scene_corners[0].x < scene_corners[2].x) && (scene_corners[1].y < scene_corners[3].y))
+		{
+		       robot::object msg;
+		       msg.xpos = xCenter;
+		       msg.area = area;
+		       objectRecPub.publish(msg);
+		}
 //               imshow("Object detection", img_scene); 
 
             } else {
@@ -167,7 +161,3 @@ int main( int argc, char** argv )
     }
     return 0;
 }
-
-  /** @function readme */
-  void readme()
-  { std::cout << " Usage: ./VidSURF <object_image>" << std::endl; }

@@ -112,4 +112,14 @@ void motorCallback(const robot::motor::ConstPtr &msg)
         char cmd[] = {'p', 'r', duty_cycle, 'y'};
         xmega.write(cmd, sizeof(cmd));
     }
+	else if (command == SET_LEFT_MOTOR)
+	{
+		char cmd[] = {'m', 'l', 'f', duty_cycle};
+        	xmega.write(cmd, sizeof(cmd));
+	}
+	else if (command == SET_RIGHT_MOTOR)
+	{
+		char cmd[] = {'m', 'r', 'f',duty_cycle};
+        	xmega.write(cmd, sizeof(cmd));
+	}
 }

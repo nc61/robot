@@ -48,6 +48,7 @@ int main(int argc, char** argv)
     ros::Subscriber servoControl = nh.subscribe<std_msgs::UInt8>("servo_command", 1, servoCallback);
     
     //Initialize servos
+    servoInit();
     while(ros::ok())
     {
         robot::sensors msg;
