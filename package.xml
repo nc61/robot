@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>Robot</name>
+  <name>robot</name>
   <version>0.0.0</version>
   <description>The Robot package</description>
 
@@ -10,12 +10,9 @@
   <url type="website">https://github.com/nc61/Robot</url>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>fcntl</build_depend>
-  <build_depend>stdio</build_depend> 
-  <build_depend>unistd</build_depend>
-  <build_depend>termios</build_depend>
-  
-<export>
-
-  </export>
+  <build_depend>SerialStream</build_depend>
+  <build_depend>string</build_depend>
+  <build_depend>iostream</build_depend>
+  <build_depend>stdlib</build_depend>
+  <run_depend>SerialStream</run_depend>
 </package>
