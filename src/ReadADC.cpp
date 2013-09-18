@@ -28,7 +28,6 @@ int main(){
     maestro.SetParity(SerialStreamBuf::PARITY_NONE);
     maestro.SetFlowControl(SerialStreamBuf::FLOW_CONTROL_HARD);
 
-    std::cout << "Press x to exit";
     while(1)
     {
         analogValue = readPin(0);
@@ -47,7 +46,7 @@ int readPin(unsigned int channel)
     
     char response[2];
     maestro.read(response, sizeof(response));
-    
+
     return response[0] + 256*response[1];
 }
 
