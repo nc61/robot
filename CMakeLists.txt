@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(Robot)
+project(robot)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -64,12 +64,12 @@ catkin_package(
 # include_directories(include)
 
 ## Declare a cpp library
-# add_library(Robot
-#   src/${PROJECT_NAME}/Robot.cpp
-# )
+
 
 ## Declare a cpp executable
-# add_executable(Robot_node src/Robot_node.cpp)
+add_executable(ReadADC src/ReadADC.cpp)
+target_link_libraries(ReadADC ${catkin_LIBRARIES} /usr/local/lib/libserial.so) 
+
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
