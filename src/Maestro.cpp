@@ -1,8 +1,7 @@
-#include <SerialStream.h>
 #include <string>
 #include <iostream>
 #include <stdlib.h>
-#include "std_msgs/UInt16.h"
+#include "robot/IR.h"
 #include "ros/ros.h"
 
 using namespace LibSerial;
@@ -18,16 +17,14 @@ SerialStream maestro;
 
 int main(int argc, char** argv){
     
-    int analogValue;
-
     maestro.Open("/dev/ttyACM0");
 
     if (!maestro.good())
     {
         std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
                   << "Error: Could not open serial port."
-                  << std::endl ;
-        exit(1) ;
+                  << std::endl;
+        exit(1);
     }
     
     maestro.SetBaudRate(SerialStreamBuf::BAUD_115200);
@@ -38,14 +35,15 @@ int main(int argc, char** argv){
 
     ros::init(argc, argv, "Maestro");
     ros::NodeHandle nh;
-    ros::Publisher infraredSensor = nh.advertise<std_msgs::UInt16>("sensor_data", 1000);
+    ros::Publisher infraredSensor = nh.advertise<robot::IR>("sensor_data", 1000);
     ros::Rate loop_rate(10);
 
     while(ros::ok())
     {
-        std_msgs::UInt16 msg;
-        msg.data = readPin(0); //Reading ADC value on pin 0
-        ROS_INFO("%d", msg.data);
+        robot::IR msg;
+        msg.leftIR = readPin(0); //Reading ADC value on pin 0
+        msg.rightIR = readPin(1); //Reading ADC value on pin 0
+        ROS_INFO("Left IR: %d\tRight IR: %d", msg.leftIR, msg.rightIR);
         infraredSensor.publish(msg);
         ros::spinOnce();
 
