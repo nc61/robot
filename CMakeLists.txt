@@ -29,7 +29,10 @@ add_executable(Maestro src/Maestro.cpp)
 target_link_libraries(Maestro ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
 
 add_executable(MaestroSubscriber src/MaestroSubscriber.cpp)
-target_link_libraries(MaestroSubscriber ${catkin_LIBRARIES} /usr/local/lib/libserial.so) 
+target_link_libraries(MaestroSubscriber ${catkin_LIBRARIES}) 
+
+add_executable(ServoPublisher src/ServoPublisher.cpp)
+target_link_libraries(ServoPublisher ${catkin_LIBRARIES}) 
 
 
 
