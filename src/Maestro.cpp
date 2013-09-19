@@ -2,8 +2,16 @@
 #include <string>
 #include <iostream>
 #include <stdlib.h>
+#include "std_msgs/UInt8.h"
 #include "robot/IR.h"
 #include "ros/ros.h"
+
+#define SENSOR_IR_L  0
+#define SENSOR_IR_R  1
+#define SERVO_ARM_L  2
+#define SERVO_ARM_R  3
+#define SERVO_BUCKET 4
+
 
 using namespace LibSerial;
 
@@ -11,9 +19,12 @@ using namespace LibSerial;
  * Description: This node publishes on the topic sensor_data. It
  *  reads data from pin 0 of the mini Maestro and publishes the 
  *  data as an integet
- ***************************************************************/
+ *************************"*************************************/
 
 uint16_t readPin(unsigned int channel);
+void servoCallback(const std_msgs::UInt8::ConstPtr &msg);
+void liftDirt();
+
 SerialStream maestro;
 
 int main(int argc, char** argv){
@@ -36,14 +47,17 @@ int main(int argc, char** argv){
 
     ros::init(argc, argv, "Maestro");
     ros::NodeHandle nh;
+    
     ros::Publisher infraredSensor = nh.advertise<robot::IR>("sensor_data", 1000);
+    ros::Subscriber servoControl = nh.subscribe<std_msgs::UInt8>("servo_command", 1000, servoCallback);
+    
     ros::Rate loop_rate(10);
-
+    
     while(ros::ok())
     {
         robot::IR msg;
-        msg.leftIR = readPin(0); //Reading ADC value on pin 0
-        msg.rightIR = readPin(1); //Reading ADC value on pin 0
+        msg.leftIR = readPin(SENSOR_IR_L); //Reading ADC value on pin 0
+        msg.rightIR = readPin(SENSOR_IR_R); //Reading ADC value on pin 0
         ROS_INFO("Left IR: %d\tRight IR: %d", msg.leftIR, msg.rightIR);
         infraredSensor.publish(msg);
         ros::spinOnce();
@@ -66,4 +80,19 @@ uint16_t readPin(unsigned int channel)
     return response[0] + 256*response[1];
 }
 
+void liftDirt()
+{
+    char cmd_speed_bucket[] = {0x87, SERVO_BUCKET, 0x0C, 0x01};
+    maestro.write(cmd_speed_bucket, sizeof(cmd_speed_bucket));
+    char cmd_pos_bucket[] = {0x84, SERVO_BUCKET, 0x70, 0x2E};
+    maestro.write(cmd_pos_bucket, sizeof(cmd_pos_bucket));
+    ROS_INFO("Lifting dirt");
+}
+
+void servoCallback(const std_msgs::UInt8::ConstPtr &msg)
+{
+    uint8_t command = msg->data;
+    ROS_INFO("Received data %d", command);
+    if (command == 0){liftDirt();}
+}
 
