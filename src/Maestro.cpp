@@ -1,3 +1,4 @@
+#include <SerialStream.h>
 #include <string>
 #include <iostream>
 #include <stdlib.h>
