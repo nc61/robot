@@ -5,19 +5,7 @@
 #include "std_msgs/UInt8.h"
 #include "robot/IR.h"
 #include "ros/ros.h"
-
-#define SENSOR_IR_L  0
-#define SENSOR_IR_R  1
-#define SERVO_ARM_L  2
-#define SERVO_ARM_R  3
-#define SERVO_BUCKET 4
-#define SERVO_ARM_RAISE_POS 0x3E40
-#define SERVO_ARM_BASE_POS 0x2E70
-#define SERVO_ARM_SPEED 0x010C
-#define SERVO_BUCKET_LIFT_POS 0x3E40
-#define SERVO_BUCKET_BASE_POS 0x2E70
-#define SERVO_BUCKET_SPEED 0x010C
-
+#include "robot/Maestro.h"
 
 using namespace LibSerial;
 
@@ -25,13 +13,6 @@ using namespace LibSerial;
  * Description: This node continously reads IR sensors at 10Hz while
  *      receiving and interpreting servo commands.
  *************************"*************************************/
-
-uint16_t readPin(unsigned int channel);
-void servoCallback(const std_msgs::UInt8::ConstPtr &msg);
-void liftDirt();
-void servoInit();
-void raiseBucket();
-void serialInit();
 
 SerialStream maestro;
 
@@ -51,12 +32,12 @@ int main(int argc, char** argv){
     while(ros::ok())
     {
         robot::IR msg;
-        msg.leftIR = readPin(SENSOR_IR_L); //Reading ADC value on pin 0
-        msg.rightIR = readPin(SENSOR_IR_R); //Reading ADC value on pin 0
+        msg.leftIR = readPin(SENSOR_IR_L_PIN); //Reading ADC value on pin 0
+        msg.rightIR = readPin(SENSOR_IR_R_PIN); //Reading ADC value on pin 0
         ROS_INFO("Left IR: %d\tRight IR: %d", msg.leftIR, msg.rightIR);
         infraredSensor.publish(msg);
+        
         ros::spinOnce();
-
         loop_rate.sleep();
     }
 
@@ -84,7 +65,7 @@ uint16_t readPin(unsigned int channel)
 
 void liftDirt()
 {
-    char cmd_pos_bucket[] =   {0x84, SERVO_BUCKET, 
+    char cmd_pos_bucket[] =   {0x84, SERVO_BUCKET_PIN, 
                               (SERVO_BUCKET_LIFT_POS & 0x7F), 
                               ((SERVO_BUCKET_LIFT_POS << 7) & 0x7F) };
     
@@ -102,7 +83,7 @@ void liftDirt()
 
 void raiseBucket()
 {
-    char cmd_pos_arms[] =     {0x9F, 2, SERVO_ARM_L, 
+    char cmd_pos_arms[] =     {0x9F, 2, SERVO_ARM_L_PIN, 
                               (SERVO_ARM_RAISE_POS & 0x7F), 
                               ((SERVO_ARM_RAISE_POS << 7) & 0x7F), 
                               (SERVO_ARM_RAISE_POS & 0x7F), 
@@ -123,21 +104,21 @@ void raiseBucket()
 
 void servoInit()
 {
-    char cmd_speed_larm[] =   {0x87, SERVO_ARM_L, 
+    char cmd_speed_larm[] =   {0x87, SERVO_ARM_L_PIN, 
                               (SERVO_ARM_SPEED & 0x7F), 
                               ((SERVO_ARM_SPEED << 7) & 0x7F)
                               };
     
     maestro.write(cmd_speed_larm, sizeof(cmd_speed_larm));
     
-    char cmd_speed_rarm[] =   {0x87, SERVO_ARM_R, 
+    char cmd_speed_rarm[] =   {0x87, SERVO_ARM_R_PIN, 
                               (SERVO_ARM_SPEED & 0x7F), 
                               ((SERVO_ARM_SPEED << 7) & 0x7F)
                               };
     
     maestro.write(cmd_speed_rarm, sizeof(cmd_speed_rarm));
     
-    char cmd_pos_arms[] =     {0x9F, 2, SERVO_ARM_L,
+    char cmd_pos_arms[] =     {0x9F, 2, SERVO_ARM_L_PIN,
                               (SERVO_ARM_BASE_POS & 0x7F), 
                               ((SERVO_ARM_BASE_POS << 7) & 0x7F), 
                               (SERVO_ARM_BASE_POS & 0x7F), 
@@ -146,13 +127,13 @@ void servoInit()
     
     maestro.write(cmd_pos_arms, sizeof(cmd_pos_arms));
     
-    char cmd_speed_bucket[] = {0x87, SERVO_BUCKET, 
+    char cmd_speed_bucket[] = {0x87, SERVO_BUCKET_PIN, 
                               (SERVO_BUCKET_SPEED & 0x7F), 
                               ((SERVO_BUCKET_SPEED << 7) & 0x7F) };
     
     maestro.write(cmd_speed_bucket, sizeof(cmd_speed_bucket));
     
-    char cmd_pos_bucket[] =   {0x84, SERVO_BUCKET, 
+    char cmd_pos_bucket[] =   {0x84, SERVO_BUCKET_PIN, 
                               (SERVO_BUCKET_BASE_POS & 0x7F), 
                               ((SERVO_BUCKET_BASE_POS << 7) & 0x7F) };
     
