@@ -11,19 +11,25 @@
 #define SERVO_ARM_L  2
 #define SERVO_ARM_R  3
 #define SERVO_BUCKET 4
+#define SERVO_ARM_RAISE_POS 0x3E40
+#define SERVO_ARM_BASE_POS 0x2E70
+#define SERVO_BUCKET_RAISE_POS 0x3E40
+#define SERVO_BUCKET_BASE_POS 0x2E70
+#define SERVO_ARM_SPEED 0x010C
+#define SERVO_BUCKET_SPEED 0x010C
 
 
 using namespace LibSerial;
 
 /***************************************************************
- * Description: This node publishes on the topic sensor_data. It
- *  reads data from pin 0 of the mini Maestro and publishes the 
- *  data as an integet
+ * Description: This node continously reads IR sensors at 10Hz while
+ *      receiving and interpreting servo commands.
  *************************"*************************************/
 
 uint16_t readPin(unsigned int channel);
 void servoCallback(const std_msgs::UInt8::ConstPtr &msg);
 void liftDirt();
+void servoInit();
 
 SerialStream maestro;
 
@@ -52,6 +58,8 @@ int main(int argc, char** argv){
     ros::Subscriber servoControl = nh.subscribe<std_msgs::UInt8>("servo_command", 1000, servoCallback);
     
     ros::Rate loop_rate(10);
+
+    servoInit();
     
     while(ros::ok())
     {
@@ -82,17 +90,52 @@ uint16_t readPin(unsigned int channel)
 
 void liftDirt()
 {
-    char cmd_speed_bucket[] = {0x87, SERVO_BUCKET, 0x0C, 0x01};
-    maestro.write(cmd_speed_bucket, sizeof(cmd_speed_bucket));
-    char cmd_pos_bucket[] = {0x84, SERVO_BUCKET, 0x70, 0x2E};
+    char cmd_pos_bucket[] = {0x84, SERVO_BUCKET, (SERVO_BUCKET_RAISE_POS & 0x7F), ((SERVO_BUCKET_RAISE_POS << 7) & 0x7F) };
     maestro.write(cmd_pos_bucket, sizeof(cmd_pos_bucket));
     ROS_INFO("Lifting dirt");
+}
+
+void raiseBucket()
+{
+    char cmd_pos_arms[] = {0x9F, 2,
+                            SERVO_ARM_L, (SERVO_ARM_RAISE_POS & 0x7F), ((SERVO_ARM_RAISE_POS << 7) & 0x7F), 
+                                         (SERVO_ARM_RAISE_POS & 0x7F), ((SERVO_ARM_RAISE_POS << 7) & 0x7F), 
+                          };
+                    
+    maestro.write(cmd_pos_arms, sizeof(cmd_pos_arms));
+    ROS_INFO("Raising bucket");
+}
+
+
+void servoInit()
+{
+    char cmd_speed_larm[] = {0x87, SERVO_ARM_L, (SERVO_ARM_SPEED & 0x7F), ((SERVO_ARM_SPEED << 7) & 0x7F)};
+    maestro.write(cmd_speed_larm, sizeof(cmd_speed_larm));
+    
+    char cmd_speed_rarm[] = {0x87, SERVO_ARM_R, (SERVO_ARM_SPEED & 0x7F), ((SERVO_ARM_SPEED << 7) & 0x7F)};
+    maestro.write(cmd_speed_rarm, sizeof(cmd_speed_rarm));
+    
+    char cmd_pos_arms[] = {0x9F, 2, 
+                            SERVO_ARM_L, (SERVO_ARM_BASE_POS & 0x7F), ((SERVO_ARM_BASE_POS << 7) & 0x7F), 
+                                         (SERVO_ARM_BASE_POS & 0x7F), ((SERVO_ARM_BASE_POS << 7) & 0x7F), 
+                          };
+    maestro.write(cmd_pos_arms, sizeof(cmd_pos_arms));
+    
+    char cmd_speed_bucket[] = {0x87, SERVO_BUCKET, (SERVO_BUCKET_SPEED & 0x7F), ((SERVO_BUCKET_SPEED << 7) & 0x7F) };
+    maestro.write(cmd_speed_bucket, sizeof(cmd_speed_bucket));
+    
+    char cmd_pos_bucket[] = {0x84, SERVO_BUCKET, (SERVO_BUCKET_BASE_POS & 0x7F), ((SERVO_BUCKET_BASE_POS << 7) & 0x7F) };
+    maestro.write(cmd_pos_bucket, sizeof(cmd_pos_bucket));
 }
 
 void servoCallback(const std_msgs::UInt8::ConstPtr &msg)
 {
     uint8_t command = msg->data;
     ROS_INFO("Received data %d", command);
+    
     if (command == 0){liftDirt();}
+    else if (command == 1){raiseBucket();}
+    else ROS_INFO("%d is not a valid command", command);
 }
+
 
