@@ -72,6 +72,13 @@ uint16_t readPin(unsigned int channel)
     char response[2];
     maestro.read(response, sizeof(response));
 
+    if (!maestro.good())
+    {
+        std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
+                  << "Error: Error in readPin()."
+                  << std::endl;
+        exit(1);
+    }
     return response[0] + 256*response[1];
 }
 
@@ -80,8 +87,17 @@ void liftDirt()
     char cmd_pos_bucket[] =   {0x84, SERVO_BUCKET, 
                               (SERVO_BUCKET_LIFT_POS & 0x7F), 
                               ((SERVO_BUCKET_LIFT_POS << 7) & 0x7F) };
+    
     maestro.write(cmd_pos_bucket, sizeof(cmd_pos_bucket));
     ROS_INFO("Lifting dirt");
+    
+    if (!maestro.good())
+    {
+        std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
+                  << "Error: Error in liftDirt()."
+                  << std::endl;
+        exit(1);
+    }
 }
 
 void raiseBucket()
@@ -92,8 +108,17 @@ void raiseBucket()
                               (SERVO_ARM_RAISE_POS & 0x7F), 
                               ((SERVO_ARM_RAISE_POS << 7) & 0x7F), 
                               };
+    
     maestro.write(cmd_pos_arms, sizeof(cmd_pos_arms));
     ROS_INFO("Raising bucket");
+    
+    if (!maestro.good())
+    {
+        std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
+                  << "Error: Error in raiseBucket()."
+                  << std::endl;
+        exit(1);
+    }
 }
 
 void servoInit()
@@ -118,17 +143,29 @@ void servoInit()
                               (SERVO_ARM_BASE_POS & 0x7F), 
                               ((SERVO_ARM_BASE_POS << 7) & 0x7F), 
                               };
+    
     maestro.write(cmd_pos_arms, sizeof(cmd_pos_arms));
     
     char cmd_speed_bucket[] = {0x87, SERVO_BUCKET, 
                               (SERVO_BUCKET_SPEED & 0x7F), 
                               ((SERVO_BUCKET_SPEED << 7) & 0x7F) };
+    
     maestro.write(cmd_speed_bucket, sizeof(cmd_speed_bucket));
     
     char cmd_pos_bucket[] =   {0x84, SERVO_BUCKET, 
                               (SERVO_BUCKET_BASE_POS & 0x7F), 
                               ((SERVO_BUCKET_BASE_POS << 7) & 0x7F) };
+    
     maestro.write(cmd_pos_bucket, sizeof(cmd_pos_bucket));
+
+    if (!maestro.good())
+    {
+        std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
+                  << "Error: Error in servoInit()."
+                  << std::endl;
+        exit(1);
+    }
+
 }
 
 void serialInit()
