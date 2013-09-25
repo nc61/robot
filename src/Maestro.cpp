@@ -1,24 +1,22 @@
-#include <SerialStream.h>
 #include <string>
-#include <iostream>
 #include <stdlib.h>
 #include "std_msgs/UInt8.h"
 #include "robot/IR.h"
 #include "ros/ros.h"
 #include "robot/Maestro.h"
+#include "robot/SerialCom.hpp"
 
-using namespace LibSerial;
 
 /***************************************************************
  * Description: This node continously reads IR sensors at 10Hz while
  *      receiving and interpreting servo commands.
  *************************"*************************************/
 
-SerialStream maestro;
+SerialCom maestro;
 
 int main(int argc, char** argv){
     
-    serialInit();
+    maestro.init("/dev/ttyACM0"); 
     ros::init(argc, argv, "Maestro");
     ros::NodeHandle nh;
     
@@ -40,26 +38,17 @@ int main(int argc, char** argv){
         ros::spinOnce();
         loop_rate.sleep();
     }
-
-    maestro.Close();
 }
 
 uint16_t readPin(unsigned int channel)
 {
 
     char command[] = {0x90, channel};
-    maestro.write(command, sizeof(command));
+    maestro.serialWrite(command);
     
-    char response[2];
-    maestro.read(response, sizeof(response));
+    char* response;
+    response = maestro.serialRead(2);
 
-    if (!maestro.good())
-    {
-        std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
-                  << "Error: Error in readPin()."
-                  << std::endl;
-        exit(1);
-    }
     return response[0] + 256*response[1];
 }
 
@@ -69,16 +58,8 @@ void liftDirt()
                               (SERVO_BUCKET_LIFT_POS & 0x7F), 
                               ((SERVO_BUCKET_LIFT_POS << 7) & 0x7F) };
     
-    maestro.write(cmd_pos_bucket, sizeof(cmd_pos_bucket));
+    maestro.serialWrite(cmd_pos_bucket);
     ROS_INFO("Lifting dirt");
-    
-    if (!maestro.good())
-    {
-        std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
-                  << "Error: Error in liftDirt()."
-                  << std::endl;
-        exit(1);
-    }
 }
 
 void raiseBucket()
@@ -90,16 +71,9 @@ void raiseBucket()
                               ((SERVO_ARM_RAISE_POS << 7) & 0x7F), 
                               };
     
-    maestro.write(cmd_pos_arms, sizeof(cmd_pos_arms));
+    maestro.serialWrite(cmd_pos_arms);
     ROS_INFO("Raising bucket");
     
-    if (!maestro.good())
-    {
-        std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
-                  << "Error: Error in raiseBucket()."
-                  << std::endl;
-        exit(1);
-    }
 }
 
 void servoInit()
@@ -109,14 +83,14 @@ void servoInit()
                               ((SERVO_ARM_SPEED << 7) & 0x7F)
                               };
     
-    maestro.write(cmd_speed_larm, sizeof(cmd_speed_larm));
+    maestro.serialWrite(cmd_speed_larm);
     
     char cmd_speed_rarm[] =   {0x87, SERVO_ARM_R_PIN, 
                               (SERVO_ARM_SPEED & 0x7F), 
                               ((SERVO_ARM_SPEED << 7) & 0x7F)
                               };
     
-    maestro.write(cmd_speed_rarm, sizeof(cmd_speed_rarm));
+    maestro.serialWrite(cmd_speed_rarm);
     
     char cmd_pos_arms[] =     {0x9F, 2, SERVO_ARM_L_PIN,
                               (SERVO_ARM_BASE_POS & 0x7F), 
@@ -125,86 +99,19 @@ void servoInit()
                               ((SERVO_ARM_BASE_POS << 7) & 0x7F), 
                               };
     
-    maestro.write(cmd_pos_arms, sizeof(cmd_pos_arms));
+    maestro.serialWrite(cmd_pos_arms);
     
     char cmd_speed_bucket[] = {0x87, SERVO_BUCKET_PIN, 
                               (SERVO_BUCKET_SPEED & 0x7F), 
                               ((SERVO_BUCKET_SPEED << 7) & 0x7F) };
     
-    maestro.write(cmd_speed_bucket, sizeof(cmd_speed_bucket));
+    maestro.serialWrite(cmd_speed_bucket);
     
     char cmd_pos_bucket[] =   {0x84, SERVO_BUCKET_PIN, 
                               (SERVO_BUCKET_BASE_POS & 0x7F), 
                               ((SERVO_BUCKET_BASE_POS << 7) & 0x7F) };
     
-    maestro.write(cmd_pos_bucket, sizeof(cmd_pos_bucket));
-
-    if (!maestro.good())
-    {
-        std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
-                  << "Error: Error in servoInit()."
-                  << std::endl;
-        exit(1);
-    }
-
-}
-
-void serialInit()
-{
-
-    maestro.Open("/dev/ttyACM0");
-    if (!maestro.good())
-    {
-        std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
-                  << "Error: Could not open serial port."
-                  << std::endl;
-        exit(1);
-    }
-    
-    maestro.SetBaudRate(SerialStreamBuf::BAUD_57600);
-    if (!maestro.good())
-    {
-        std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
-                  << "Error: Could not set baud rate."
-                  << std::endl;
-        exit(1);
-    }
-    
-    maestro.SetCharSize(SerialStreamBuf::CHAR_SIZE_8);
-    if (!maestro.good())
-    {
-        std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
-                  << "Error: Could not set char size."
-                  << std::endl;
-        exit(1);
-    }
-    
-    maestro.SetNumOfStopBits(1);
-    if (!maestro.good())
-    {
-        std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
-                  << "Error: Could not set num stop bits."
-                  << std::endl;
-        exit(1);
-    }
-   
-    maestro.SetParity(SerialStreamBuf::PARITY_NONE);
-    if (!maestro.good())
-    {
-        std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
-                  << "Error: Could not set parity."
-                  << std::endl;
-        exit(1);
-    }
-    
-    maestro.SetFlowControl(SerialStreamBuf::FLOW_CONTROL_NONE);
-    if (!maestro.good())
-    {
-        std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
-                  << "Error: Could not set flow control."
-                  << std::endl;
-        exit(1);
-    }
+    maestro.serialWrite(cmd_pos_bucket);
 
 }
 

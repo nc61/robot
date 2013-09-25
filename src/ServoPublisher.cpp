@@ -16,7 +16,8 @@ int main(int argc, char** argv){
     while(ros::ok())
     {
         std_msgs::UInt8 msg;
-        msg.data = SERVO_BUCKET_PICK_UP;
+        //msg.data = SERVO_BUCKET_PICK_UP;
+        msg.data = 2;
         ROS_INFO("Sending servo command %d", msg.data);
         ServoCommand.publish(msg);
         loop_rate.sleep();

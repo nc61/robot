@@ -21,12 +21,13 @@ catkin_package()
 
 ## Declare a cpp executable
 include_directories(include ${catkin_INCLUDE_DIRS})
+add_library(SerialCom ~/catkin_ws/src/robot/src/SerialCom.cpp)
 
 add_executable(ReadADC src/ReadADC.cpp)
 target_link_libraries(ReadADC ${catkin_LIBRARIES} /usr/local/lib/libserial.so) 
 
 add_executable(Maestro src/Maestro.cpp)
-target_link_libraries(Maestro ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
+target_link_libraries(Maestro ${catkin_LIBRARIES} /usr/local/lib/libserial.so SerialCom)
 
 add_executable(MaestroSubscriber src/MaestroSubscriber.cpp)
 target_link_libraries(MaestroSubscriber ${catkin_LIBRARIES}) 
@@ -34,5 +35,9 @@ target_link_libraries(MaestroSubscriber ${catkin_LIBRARIES})
 add_executable(ServoPublisher src/ServoPublisher.cpp)
 target_link_libraries(ServoPublisher ${catkin_LIBRARIES}) 
 
+add_executable(SimpleServo src/SimpleServo.cpp)
+target_link_libraries(SimpleServo ${catkin_LIBRARIES} /usr/local/lib/libserial.so) 
 
+add_executable(Shutdown src/Shutdown.cpp)
+target_link_libraries(Shutdown ${catkin_LIBRARIES}) 
 
