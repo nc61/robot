@@ -14,8 +14,8 @@
 
 SerialCom maestro;
 
-int main(int argc, char** argv){
-    
+int main(int argc, char** argv)
+{
     maestro.init("/dev/ttyACM0"); 
     ros::init(argc, argv, "Maestro");
     ros::NodeHandle nh;

@@ -17,7 +17,7 @@ void SerialCom::init(std::string str)
     port.SetBaudRate(SerialStreamBuf::BAUD_57600);
     if (!port.good())
     {
-        std::cerr << "Error: Could not set baud rate for"
+        std::cerr << "Error: Could not set baud rate for "
                   << str
                   << std::endl;
         exit(1);
@@ -26,7 +26,7 @@ void SerialCom::init(std::string str)
     port.SetCharSize(SerialStreamBuf::CHAR_SIZE_8);
     if (!port.good())
     {
-        std::cerr << "Error: Could not set char size for"
+        std::cerr << "Error: Could not set char size for "
                   << str
                   << std::endl;
         exit(1);
@@ -35,7 +35,7 @@ void SerialCom::init(std::string str)
     port.SetNumOfStopBits(1);
     if (!port.good())
     {
-        std::cerr << "Error: Could not set num stop bits for"
+        std::cerr << "Error: Could not set num stop bits for "
                   << str
                   << std::endl;
         exit(1);
@@ -43,8 +43,8 @@ void SerialCom::init(std::string str)
    
     port.SetParity(SerialStreamBuf::PARITY_NONE);
     if (!port.good())
-    {
-        std::cerr << "Error: Could not set parity for"
+    { 
+        std::cerr << "Error: Could not set parity for "
                   << str
                   << std::endl;
         exit(1);
@@ -53,7 +53,7 @@ void SerialCom::init(std::string str)
     port.SetFlowControl(SerialStreamBuf::FLOW_CONTROL_NONE);
     if (!port.good())
     {
-        std::cerr << "Error: Could not set flow control for"
+        std::cerr << "Error: Could not set flow control for "
                   << str
                   << std::endl;
         exit(1);

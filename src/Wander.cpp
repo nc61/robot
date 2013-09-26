@@ -25,7 +25,7 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
     ros::Publisher motorPub = nh.advertise<std_msgs::UInt8>("motor_command", 1000);
     ros::Subscriber IRSub = nh.subscribe<robot::IR>("sensor_data", 1000, processIR);
-    ros::Rate loop_rate(10);
+    ros::Rate loop_rate(2);
 
     while(ros::ok())
     {
@@ -77,24 +77,27 @@ int main(int argc, char** argv)
                 }
                 mode = prev_mode; //Go back to the original mode
             }
-        }
-
-        case WANDER:
-        {
-            std_msgs::UInt8 msg;
-            msg.data = GO_FORWARD;
-            motorPub.publish(msg);
+            
+            case WANDER:
+            {
+                ROS_INFO("Wandering");
+                std_msgs::UInt8 msg;
+                msg.data = GO_FORWARD;
+                motorPub.publish(msg);
+                ros::spinOnce();
+            }
         }
         // Run loop at 10Hz
         loop_rate.sleep();
-    }
 
+    }
 }
 
 void processIR(const robot::IR::ConstPtr &msg)
 {
     rightIR = msg->rightIR;
     leftIR = msg->leftIR;
+    ROS_INFO("Received message: %d", rightIR);
     
     if (mode != OBS_AVOID) 
     {

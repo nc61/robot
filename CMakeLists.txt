@@ -38,6 +38,8 @@ target_link_libraries(ServoPublisher ${catkin_LIBRARIES})
 add_executable(SimpleServo src/SimpleServo.cpp)
 target_link_libraries(SimpleServo ${catkin_LIBRARIES} /usr/local/lib/libserial.so) 
 
-add_executable(Shutdown src/Shutdown.cpp)
-target_link_libraries(Shutdown ${catkin_LIBRARIES}) 
+add_executable(Wander src/Wander.cpp)
+target_link_libraries(Wander ${catkin_LIBRARIES})
 
+add_executable(WanderTest src/WanderTest.cpp)
+target_link_libraries(WanderTest ${catkin_LIBRARIES})
