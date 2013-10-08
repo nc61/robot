@@ -17,23 +17,17 @@ generate_messages(DEPENDENCIES std_msgs)
 
 
 
-catkin_package()
+catkin_package(
+	CATKIN_DEPENDS message_runtime
+)
 
 ## Declare a cpp executable
 include_directories(include ${catkin_INCLUDE_DIRS})
 add_library(SerialCom ~/catkin_ws/src/robot/src/SerialCom.cpp)
 
-add_executable(ReadADC src/ReadADC.cpp)
-target_link_libraries(ReadADC ${catkin_LIBRARIES} /usr/local/lib/libserial.so) 
 
 add_executable(Maestro src/Maestro.cpp)
 target_link_libraries(Maestro ${catkin_LIBRARIES} /usr/local/lib/libserial.so SerialCom)
-
-add_executable(MaestroSubscriber src/MaestroSubscriber.cpp)
-target_link_libraries(MaestroSubscriber ${catkin_LIBRARIES}) 
-
-add_executable(ServoPublisher src/ServoPublisher.cpp)
-target_link_libraries(ServoPublisher ${catkin_LIBRARIES}) 
 
 add_executable(SimpleServo src/SimpleServo.cpp)
 target_link_libraries(SimpleServo ${catkin_LIBRARIES} /usr/local/lib/libserial.so) 
@@ -43,3 +37,6 @@ target_link_libraries(Wander ${catkin_LIBRARIES})
 
 add_executable(WanderTest src/WanderTest.cpp)
 target_link_libraries(WanderTest ${catkin_LIBRARIES})
+
+add_executable(XmegaTest src/XmegaTest.cpp)
+target_link_libraries(XmegaTest ${catkin_LIBRARIES} /usr/local/lib/libserial.so SerialCom)

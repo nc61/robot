@@ -31,8 +31,9 @@ int main(int argc, char** argv)
     {
         robot::IR msg;
         msg.leftIR = readPin(SENSOR_IR_L_PIN); //Reading ADC value on pin 0
+        msg.midIR = readPin(SENSOR_IR_M_PIN);
         msg.rightIR = readPin(SENSOR_IR_R_PIN); //Reading ADC value on pin 0
-        ROS_INFO("Left IR: %d\tRight IR: %d", msg.leftIR, msg.rightIR);
+        ROS_INFO("Left IR: %d\tMiddle IR: %d\tRight IR: %d", msg.leftIR, msg.midIR, msg.rightIR);
         infraredSensor.publish(msg);
         
         ros::spinOnce();

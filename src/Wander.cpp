@@ -76,8 +76,9 @@ int main(int argc, char** argv)
                     }
                 }
                 mode = prev_mode; //Go back to the original mode
+                break;
             }
-            
+                        
             case WANDER:
             {
                 ROS_INFO("Wandering");
@@ -85,6 +86,7 @@ int main(int argc, char** argv)
                 msg.data = GO_FORWARD;
                 motorPub.publish(msg);
                 ros::spinOnce();
+                break;
             }
         }
         // Run loop at 10Hz
