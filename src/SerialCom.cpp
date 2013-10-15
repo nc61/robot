@@ -2,6 +2,8 @@
 
 using namespace LibSerial;
 
+SerialStream port;
+
 void SerialCom::init(std::string str)
 {
 
@@ -72,4 +74,21 @@ char* SerialCom::serialRead(int length)
     char* read = new char[length];
     port.read(read, length);
     return read;
+}
+
+bool SerialCom::dataInBuf()
+{
+    return (port.rdbuf()->in_avail());
+}
+
+char SerialCom::readByte()
+{
+    char ch;
+    port.get(ch);
+    return ch;
+}
+
+void SerialCom::Close()
+{
+    port.Close();
 }

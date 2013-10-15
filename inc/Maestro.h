@@ -1,8 +1,9 @@
 #define SENSOR_IR_L_PIN  0
-#define SENSOR_IR_R_PIN  1
-#define SERVO_ARM_L_PIN  2
-#define SERVO_ARM_R_PIN  3
-#define SERVO_BUCKET_PIN 4
+#define SENSOR_IR_M_PIN  1
+#define SENSOR_IR_R_PIN  2
+#define SERVO_ARM_L_PIN  3
+#define SERVO_ARM_R_PIN  4
+#define SERVO_BUCKET_PIN 5
 
 #define SERVO_ARM_RAISE_POS 0x3E40
 #define SERVO_ARM_LIFT_POS 0x3E40

@@ -1,0 +1,4 @@
+<launch>
+    <node name="Xmega" pkg="robot" type="Xmega" />
+    <node name="XmegaTest" pkg="robot" type="XmegaTest" />
+</launch>
