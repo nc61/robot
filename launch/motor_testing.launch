@@ -1,4 +1,5 @@
 <launch>
     <node name="Xmega" pkg="robot" type="Xmega" />
     <node name="XmegaTest" pkg="robot" type="XmegaTest" />
+    <node name="messages" pkg="rqt_console" type="rqt_console"/>
 </launch>
