@@ -20,18 +20,20 @@ catkin_package(
 )
 
 ## Declare a cpp executable
-include_directories(include ${catkin_INCLUDE_DIRS})
-add_library(SerialCom ~/catkin_ws/src/robot/src/SerialCom.cpp)
-target_link_libraries(SerialCom /usr/local/lib/libserial.so)
+include_directories(include ${catkin_INCLUDE_DIRS} /home/nick/catkin_ws/src/robot/inc/)
 
 add_executable(Maestro src/Maestro.cpp)
-target_link_libraries(Maestro ${catkin_LIBRARIES} SerialCom)
+target_link_libraries(Maestro ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
 
 add_executable(Xmega src/Xmega.cpp)
-target_link_libraries(Xmega ${catkin_LIBRARIES} SerialCom)
+target_link_libraries(Xmega ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
 
-add_executable(XmegaTest src/XmegaTest.cpp)
-target_link_libraries(XmegaTest ${catkin_LIBRARIES})
+add_executable(SenseReact src/SenseReact.cpp)
+target_link_libraries(SenseReact ${catkin_LIBRARIES})
 
-add_executable(SerialTest src/SerialTest.cpp)
-target_link_libraries(SerialTest ${catkin_LIBRARIES} SerialCom)
+#add_executable(XmegaTest src/XmegaTest.cpp)
+#target_link_libraries(XmegaTest ${catkin_LIBRARIES})
+
+#add_executable(SerialTest src/SerialTest.cpp)
+#target_link_libraries(SerialTest ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
+

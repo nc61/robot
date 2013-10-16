@@ -1,3 +1,6 @@
+#ifndef MAESTRO_H
+#define MAESTRO_h
+
 #define SENSOR_IR_L_PIN  0
 #define SENSOR_IR_M_PIN  1
 #define SENSOR_IR_R_PIN  2
@@ -18,9 +21,12 @@
 #define SERVO_BUCKET_SPEED 0x010C
 
 
-uint16_t readPin(unsigned int channel);
+uint16_t readPin(uint8_t channel);
 void servoCallback(const std_msgs::UInt8::ConstPtr &msg);
 void liftDirt();
 void servoInit();
 void raiseBucket();
 void serialInit();
+void getError(uint8_t location);
+
+#endif

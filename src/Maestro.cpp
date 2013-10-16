@@ -3,8 +3,9 @@
 #include "std_msgs/UInt8.h"
 #include "robot/IR.h"
 #include "ros/ros.h"
-#include "robot/Maestro.h"
+#include "Maestro.h"
 #include <SerialStream.h>
+#include "Common.h"
 using namespace LibSerial;
 
 /***************************************************************
@@ -33,9 +34,10 @@ int main(int argc, char** argv)
     }
 
     getError(0);
+    
     ros::init(argc, argv, "Maestro");
     ros::NodeHandle nh;
-    ros::Rate loop_rate(10);
+    ros::Rate loop_rate(LOOP_RATE);
     
     //Publisher
     ros::Publisher infraredSensor = nh.advertise<robot::IR>("sensor_data", 1000);
@@ -63,7 +65,6 @@ int main(int argc, char** argv)
 
 uint16_t readPin(uint8_t channel)
 {
-
     char command[] = {0x90, channel};
     maestro.write(command, sizeof(command));
    
@@ -140,16 +141,6 @@ void servoInit()
 
 }
 
-void servoCallback(const std_msgs::UInt8::ConstPtr &msg)
-{
-    uint8_t command = msg->data;
-    ROS_INFO("Received data %d", command);
-    
-    if (command == 0){liftDirt();}
-    else if (command == 1){raiseBucket();}
-    else ROS_INFO("%d is not a valid command", command);
-}
-
 void getError(uint8_t location)
 {
     char cmd_error[] = {0xA1};
@@ -162,6 +153,19 @@ void getError(uint8_t location)
     error_num[0] = error_char[0];
     error_num[1] = error_char[1];
 
-    ROS_INFO("Error code %x%x at location %d", error_num[0], error_num[1], location);
+    ROS_FATAL("Error code %x%x at location %d", error_num[0], error_num[1], location);
 }
 
+/******************************************************
+ * Callback functions
+ ******************************************************/
+
+void servoCallback(const std_msgs::UInt8::ConstPtr &msg)
+{
+    uint8_t command = msg->data;
+    ROS_INFO("Received data %d", command);
+    
+    if (command == 0){liftDirt();}
+    else if (command == 1){raiseBucket();}
+    else ROS_INFO("%d is not a valid command", command);
+}

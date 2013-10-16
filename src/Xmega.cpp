@@ -2,15 +2,9 @@
 #include "std_msgs/Char.h"
 #include "robot/motor.h"
 #include <SerialStream.h>
-
-#define GO_FORWARD 0
-#define GO_BACKWARDS 1
-#define PIVOT_RIGHT 2
-#define PIVOT_LEFT 3
-#define STOP_MOTORS 4
-#define DEBUG 5
-
-void motorCallback(const robot::motor::ConstPtr &msg);
+#include "SenseReact.h"
+#include "Common.h"
+#include "Xmega.h"
 
 using namespace LibSerial;
 SerialStream xmega;
@@ -26,7 +20,7 @@ int main(int argc, char** argv)
     xmega.SetFlowControl(SerialStreamBuf::FLOW_CONTROL_NONE);
     if (!xmega.good())
     {
-        std::cerr << "Error opening serial port"
+        std::cerr << "Error opening serial port "
                   << str
                   << std::endl;
         exit(1);
@@ -53,9 +47,9 @@ int main(int argc, char** argv)
             ROS_INFO("Received byte: %d", byte);
             if (byte == 0xAA)
             {
-                //Message 0 means motors have stopped
+                //Message 1 means motors have stopped
                 std_msgs::Char msg;
-                msg.data = 0;
+                msg.data = 1;
                 motorFeedback.publish(msg);
             }
         }
@@ -69,27 +63,31 @@ void motorCallback(const robot::motor::ConstPtr &msg)
     
     if (command == GO_FORWARD)
     {
-        ROS_INFO("Going Forward");
+        ROS_INFO("Going forward");
         char cmd[] = {'m', 'b', 'f', duty_cycle};
         xmega.write(cmd, sizeof(cmd));
-    }
+    } 
     else if (command == PIVOT_RIGHT)
     {
+        ROS_INFO("Pivoting right");
         char cmd[] = {'p', 'r', duty_cycle};
         xmega.write(cmd, sizeof(cmd));
     }
     else if (command == PIVOT_LEFT)
     {
+        ROS_INFO("Pivoting left");
         char cmd[] = {'p', 'l', duty_cycle};
         xmega.write(cmd, sizeof(cmd));
     }
-    else if (command == GO_BACKWARDS)
+    else if (command == GO_BACKWARD)
     {
+        ROS_INFO("Going backward");
         char cmd[] = {'m', 'b', 'b', duty_cycle};
         xmega.write(cmd, sizeof(cmd));
     }
     else if (command == STOP_MOTORS)
     {
+        ROS_INFO("Stopping");
         char cmd[] = {'s', 'y'};
         xmega.write(cmd, sizeof(cmd));
     }
