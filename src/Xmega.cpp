@@ -1,5 +1,5 @@
 #include "ros/ros.h"
-#include "std_msgs/Char.h"
+#include "std_msgs/UInt8.h"
 #include "robot/motor.h"
 #include <SerialStream.h>
 #include "SenseReact.h"
@@ -28,12 +28,11 @@ int main(int argc, char** argv)
 
     ros::init(argc, argv, "Xmega");
     ros::NodeHandle nh;
-    ros::Rate init_delay(10);
     ros::Rate loop_rate(10);
 
     //Publishers
-    ros::Publisher motorFeedback = nh.advertise<std_msgs::Char>("motor_feedback", 1000);
-    init_delay.sleep();
+    ros::Publisher xmegaFeedback = nh.advertise<std_msgs::UInt8>("xmega_feedback", 1000);
+    loop_rate.sleep();
     //Subscribers
     ros::Subscriber motorCommand = nh.subscribe<robot::motor>("motor_command", 1000, motorCallback);
     
@@ -44,13 +43,14 @@ int main(int argc, char** argv)
         {
             char byte;
             xmega.get(byte);
-            ROS_INFO("Received byte: %d", byte);
-            if (byte == 0xAA)
+            ROS_INFO("Received char: %c", byte);
+            if (byte == 's')
             {
                 //Message 1 means motors have stopped
-                std_msgs::Char msg;
+                std_msgs::UInt8 msg;
                 msg.data = 1;
-                motorFeedback.publish(msg);
+                ROS_INFO("Sending message %d", msg.data);
+                xmegaFeedback.publish(msg);
             }
         }
     }

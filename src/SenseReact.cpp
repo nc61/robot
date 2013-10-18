@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "robot/motor.h"
 #include "robot/IR.h"
+#include "std_msgs/UInt8.h"
 #include "std_msgs/Char.h"
 #include "SenseReact.h"
 #include "Common.h"
@@ -26,7 +27,7 @@ int main(int argc, char** argv)
     loop_rate.sleep();
     //Subscriber
     ros::Subscriber IRSub = nh.subscribe<robot::IR>("sensor_data", 2, processIR);
-    ros::Subscriber xmegaSub = nh.subscribe<std_msgs::Char>("xmega_serial", 1, xmegaFeedback);
+    ros::Subscriber xmegaSub = nh.subscribe<std_msgs::UInt8>("xmega_feedback", 1, xmegaFeedback);
 
     while(ros::ok())
     {
@@ -38,9 +39,10 @@ int main(int argc, char** argv)
                 avoid_obstacle();
             }
 
-            sendCommand(GO_FORWARD, 30);
+            sendCommand(GO_FORWARD, 75);
             ros::spinOnce();
         }
+        loop_rate.sleep();
     }
 }
 
@@ -52,18 +54,20 @@ void avoid_obstacle()
     {
         ROS_WARN("Object in front");
         stop();
-        sendCommand(GO_BACKWARD, 30);
+        sendCommand(GO_BACKWARD, 70);
         while(midIR > MID_FAR) { ros::spinOnce(); }
         stop();
-        (leftIR > rightIR) ? sendCommand(PIVOT_RIGHT, 30) : sendCommand(PIVOT_LEFT, 30) ; 
+        (leftIR > rightIR) ? sendCommand(PIVOT_RIGHT, 70) : sendCommand(PIVOT_LEFT, 70) ; 
         while (midIR > MID_FAR){ ros::spinOnce(); }
     } else if (leftIR > LEFT_VN) {
+        stop();
         ROS_WARN("Object to left");
-        sendCommand(PIVOT_RIGHT, 30);
+        sendCommand(PIVOT_RIGHT, 70);
         while (leftIR > LEFT_FAR) { ros::spinOnce(); }
     } else if (rightIR > RIGHT_VN) {
+        stop();
         ROS_WARN("Object to right");
-        sendCommand(PIVOT_LEFT, 30);
+        sendCommand(PIVOT_LEFT, 70);
         while (rightIR > RIGHT_FAR) { ros::spinOnce(); }
     }
 }
@@ -78,7 +82,7 @@ void stop()
     motorPub.publish(msg);
     
     wait = 0;
-    while (wait != 0xAA){ ros::spinOnce(); }
+    while (wait != 1){ ros::spinOnce(); }
 }
 
 //Description: Sends a command to the motor controller
@@ -105,8 +109,9 @@ void processIR(const robot::IR::ConstPtr &msg)
 
 //Description: Updates global variable (feedback from xmega)
 //Called by: spinOnce();
-void xmegaFeedback(const std_msgs::Char::ConstPtr &msg)
+void xmegaFeedback(const std_msgs::UInt8::ConstPtr &msg)
 {
     wait = msg->data;
+    ROS_INFO("wait value: %d", wait);
 }
 
