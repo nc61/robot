@@ -4,9 +4,8 @@ project(robot)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
-
 find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs genmsg)
+find_package(OpenCV REQUIRED)
 
 ## Declare ROS messages and services
 add_message_files(DIRECTORY msg FILES IR.msg motor.msg)
@@ -31,6 +30,14 @@ target_link_libraries(Xmega ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
 add_executable(SenseReact src/SenseReact.cpp)
 target_link_libraries(SenseReact ${catkin_LIBRARIES})
 
+add_executable(RedDetect src/RedDetect.cpp)
+target_link_libraries(RedDetect ${catkin_LIBRARIES} ${OpenCV_LIBS})
+
+add_executable(SURF src/SURF.cpp)
+target_link_libraries(SURF ${catkin_LIBRARIES} ${OpenCV_LIBS})
+
+add_executable(VidSURF src/VidSURF.cpp)
+target_link_libraries(VidSURF ${catkin_LIBRARIES} ${OpenCV_LIBS})
 #add_executable(XmegaTest src/XmegaTest.cpp)
 #target_link_libraries(XmegaTest ${catkin_LIBRARIES})
 
