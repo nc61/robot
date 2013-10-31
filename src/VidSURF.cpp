@@ -7,6 +7,7 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/calib3d/calib3d.hpp"
 #include "ros/ros.h"
+#include <ctime>
 
 using namespace cv;
 
@@ -15,14 +16,17 @@ void readme();
 /** @function main */
 int main( int argc, char** argv )
 {
-/*    ros::init(argc, argv, "VidSURF");
-    ros::NodeHandle nh;
-    ros::Rate loop_rate(.1);
-*/
-    if( argc != 2 )
-    { readme(); return -1; }
+//   ros::init(argc, argv, "VidSURF");
+//   ros::NodeHandle nh;
+//   ros::Rate loop_rate(.1);
 
-    int minHessian = 600;
+    if( argc != 2 )
+    { 
+        readme(); 
+        return -1; 
+    }
+
+    int minHessian = 500;
     Mat frame;
     Mat img_scene;
     Mat img_object;
@@ -40,95 +44,102 @@ int main( int argc, char** argv )
         std::cout << "Error opening camera" << std::endl;
         return(-1);
     }
+        
+    //Initialize a detector and an extractor
+    SurfFeatureDetector detector(minHessian);
+    SurfDescriptorExtractor extractor;
     
+    //Calculate and extract key points of the object
+    std::vector<KeyPoint> keypoints_object;
+    detector.detect(img_object, keypoints_object);
+    Mat descriptors_object;
+    extractor.compute(img_object, keypoints_object, descriptors_object);
+    
+   
+    //Find the corners of the object image
+    std::vector<Point2f> obj_corners(4);
+    obj_corners[0] = cvPoint(0,0); 
+    obj_corners[1] = cvPoint(img_object.cols, 0);
+    obj_corners[2] = cvPoint(img_object.cols, img_object.rows); 
+    obj_corners[3] = cvPoint(0, img_object.rows);
+
     while(1){
-       capture >> frame;
-       cvtColor(frame, img_scene, CV_RGB2GRAY);
+
+        //Capture frame, then extract key points and descriptors
+        capture >> frame;
+        cvtColor(frame, img_scene, CV_RGB2GRAY);
 
         if(!img_scene.data)
         {
-            std::cout << "Error creating scene matrix";
+            std::cout << "Error creating scene matrix" << std::endl;
             return(-1);
         }
         
-        //-- Step 1: Detect the keypoints using SURF Detector
-        
-        SurfFeatureDetector detector(minHessian);
+        std::vector<KeyPoint> keypoints_scene;
+        detector.detect(img_scene, keypoints_scene);
+        Mat descriptors_scene;
+        extractor.compute(img_scene, keypoints_scene, descriptors_scene);
+    
 
-        std::vector<KeyPoint> keypoints_object, keypoints_scene;
-
-        detector.detect( img_object, keypoints_object );
-        detector.detect( img_scene, keypoints_scene );
-
-        //-- Step 2: Calculate descriptors (feature vectors)
-        SurfDescriptorExtractor extractor;
-
-        Mat descriptors_object, descriptors_scene;
-
-        extractor.compute( img_object, keypoints_object, descriptors_object );
-        extractor.compute( img_scene, keypoints_scene, descriptors_scene );
-
-        //-- Step 3: Matching descriptor vectors using FLANN matcher
+        //Match descriptor vectors using FLANN matcher
         FlannBasedMatcher matcher;
         std::vector<DMatch> matches;
-        matcher.match( descriptors_object, descriptors_scene, matches );
+        matcher.match(descriptors_object, descriptors_scene, matches);
 
-        double max_dist = 0; 
-        double min_dist = 100;
+        
+            std::cout << "time: " << time(NULL)  << std::endl;
+            //Calculate minimum and maximum distances    
+            double max_dist = 0; 
+            double min_dist = 100;
+            for(int i = 0; i < descriptors_object.rows; i++)
+            { 
+                double dist = matches[i].distance;
+                if(dist < min_dist) min_dist = dist;
+                if(dist > max_dist) max_dist = dist;
+            }
+            
+            //Draw only "good" matches (i.e. whose distance is less than 3*min_dist )
+            std::vector<DMatch> good_matches;
 
-        //-- Quick calculation of max and min distances between keypoints
-        for( int i = 0; i < descriptors_object.rows; i++ )
-        { double dist = matches[i].distance;
-        if( dist < min_dist ) min_dist = dist;
-        if( dist > max_dist ) max_dist = dist;
+            for( int i = 0; i < descriptors_object.rows; i++ )
+            { 
+                if(matches[i].distance <= 3*min_dist) 
+                    {good_matches.push_back( matches[i]);}
+            }
+            
+            //-- Localize the object
+            std::vector<Point2f> obj;
+            std::vector<Point2f> scene;
+
+        if (good_matches.size() >= 4)
+        { 
+            for( int i = 0; i < good_matches.size(); i++ )
+            {
+                //-- Get the keypoints from the good matches
+                obj.push_back(keypoints_object[good_matches[i].queryIdx].pt);
+                scene.push_back(keypoints_scene[good_matches[i].trainIdx].pt );
+            }
+            
+            Mat H = findHomography( obj, scene, CV_RANSAC );
+
+            //-- Get the corners from the image_1 ( the object to be "detected" )
+            std::vector<Point2f> scene_corners(4);
+            perspectiveTransform(obj_corners, scene_corners, H);
+            
+            line( img_scene, scene_corners[0], 
+                  scene_corners[1], Scalar(0, 255, 0), 4 );
+            line( img_scene, scene_corners[1], 
+                    scene_corners[2], Scalar( 0, 255, 0), 4 );
+            line( img_scene, scene_corners[2], 
+                    scene_corners[3], Scalar( 0, 255, 0), 4 );
+            line( img_scene, scene_corners[3], 
+                    scene_corners[0], Scalar( 0, 255, 0), 4 );
+            //-- Show detected matches
+            imshow("Object detection", img_scene);
+        } else {
+            imshow("Object detection", img_scene);
         }
-
-        printf("-- Max dist : %f \n", max_dist );
-        printf("-- Min dist : %f \n", min_dist );
-
-        //-- Draw only "good" matches (i.e. whose distance is less than 3*min_dist )
-        std::vector<DMatch> good_matches;
-
-        for( int i = 0; i < descriptors_object.rows; i++ )
-        { if( matches[i].distance < 3*min_dist )
-         { good_matches.push_back( matches[i]); }
-        }
-
-        Mat img_matches;
-        drawMatches( img_object, keypoints_object, img_scene, keypoints_scene,
-                   good_matches, img_matches, Scalar::all(-1), Scalar::all(-1),
-                   vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
-
-        //-- Localize the object
-        std::vector<Point2f> obj;
-        std::vector<Point2f> scene;
-
-        for( int i = 0; i < good_matches.size(); i++ )
-        {
-            //-- Get the keypoints from the good matches
-            obj.push_back( keypoints_object[ good_matches[i].queryIdx ].pt );
-            scene.push_back( keypoints_scene[ good_matches[i].trainIdx ].pt );
-        }
-
-        Mat H = findHomography( obj, scene, CV_RANSAC );
-
-        //-- Get the corners from the image_1 ( the object to be "detected" )
-        std::vector<Point2f> obj_corners(4);
-        obj_corners[0] = cvPoint(0,0); obj_corners[1] = cvPoint( img_object.cols, 0 );
-        obj_corners[2] = cvPoint( img_object.cols, img_object.rows ); obj_corners[3] = cvPoint( 0, img_object.rows );
-        std::vector<Point2f> scene_corners(4);
-
-        perspectiveTransform( obj_corners, scene_corners, H);
-
-        //-- Draw lines between the corners (the mapped object in the scene - image_2 )
-        line( img_matches, scene_corners[0] + Point2f( img_object.cols, 0), scene_corners[1] + Point2f( img_object.cols, 0), Scalar(0, 255, 0), 4 );
-        line( img_matches, scene_corners[1] + Point2f( img_object.cols, 0), scene_corners[2] + Point2f( img_object.cols, 0), Scalar( 0, 255, 0), 4 );
-        line( img_matches, scene_corners[2] + Point2f( img_object.cols, 0), scene_corners[3] + Point2f( img_object.cols, 0), Scalar( 0, 255, 0), 4 );
-        line( img_matches, scene_corners[3] + Point2f( img_object.cols, 0), scene_corners[0] + Point2f( img_object.cols, 0), Scalar( 0, 255, 0), 4 );
-
-        //-- Show detected matches
-        imshow( "Good Matches & Object detection", img_matches );
-        char ch =  waitKey(30);
+        char ch =  waitKey(1);
         if (ch == 27) break;
     }
     return 0;
