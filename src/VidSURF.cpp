@@ -26,7 +26,7 @@ int main( int argc, char** argv )
         return -1; 
     }
 
-    int minHessian = 500;
+    int minHessian = 400;
     Mat frame;
     Mat img_scene;
     Mat img_object;
@@ -38,7 +38,7 @@ int main( int argc, char** argv )
         return -1; 
     }
     
-    VideoCapture capture(0);
+    VideoCapture capture(1);
     if (!capture.isOpened())
     {
         std::cout << "Error opening camera" << std::endl;
@@ -54,8 +54,11 @@ int main( int argc, char** argv )
     detector.detect(img_object, keypoints_object);
     Mat descriptors_object;
     extractor.compute(img_object, keypoints_object, descriptors_object);
+
+    //Check to make sure descriptors are calculated
+    if (descriptors_object.empty() ) 
+        cvError(0,"MatchFinder","1st descriptor empty",__FILE__,__LINE__); 
     
-   
     //Find the corners of the object image
     std::vector<Point2f> obj_corners(4);
     obj_corners[0] = cvPoint(0,0); 
@@ -78,15 +81,16 @@ int main( int argc, char** argv )
         std::vector<KeyPoint> keypoints_scene;
         detector.detect(img_scene, keypoints_scene);
         Mat descriptors_scene;
-        extractor.compute(img_scene, keypoints_scene, descriptors_scene);
-    
-
-        //Match descriptor vectors using FLANN matcher
-        FlannBasedMatcher matcher;
-        std::vector<DMatch> matches;
-        matcher.match(descriptors_object, descriptors_scene, matches);
-
         
+        extractor.compute(img_scene, keypoints_scene, descriptors_scene);
+        if (!descriptors_scene.empty())
+        {
+        
+            //Match descriptor vectors using FLANN matcher
+            FlannBasedMatcher matcher;
+            std::vector<DMatch> matches;
+            matcher.match(descriptors_object, descriptors_scene, matches);
+            
             std::cout << "time: " << time(NULL)  << std::endl;
             //Calculate minimum and maximum distances    
             double max_dist = 0; 
@@ -106,38 +110,45 @@ int main( int argc, char** argv )
                 if(matches[i].distance <= 3*min_dist) 
                     {good_matches.push_back( matches[i]);}
             }
+
             
             //-- Localize the object
             std::vector<Point2f> obj;
             std::vector<Point2f> scene;
 
-        if (good_matches.size() >= 4)
-        { 
-            for( int i = 0; i < good_matches.size(); i++ )
-            {
-                //-- Get the keypoints from the good matches
-                obj.push_back(keypoints_object[good_matches[i].queryIdx].pt);
-                scene.push_back(keypoints_scene[good_matches[i].trainIdx].pt );
-            }
-            
-            Mat H = findHomography( obj, scene, CV_RANSAC );
+            if (good_matches.size() >= 4)
+            { 
+                for( int i = 0; i < good_matches.size(); i++ )
+                {
+                    //-- Get the keypoints from the good matches
+                    obj.push_back(keypoints_object[good_matches[i].queryIdx].pt);
+                    scene.push_back(keypoints_scene[good_matches[i].trainIdx].pt );
+                }
+                
+                
+                Mat H = findHomography( obj, scene, CV_RANSAC );
 
-            //-- Get the corners from the image_1 ( the object to be "detected" )
-            std::vector<Point2f> scene_corners(4);
-            perspectiveTransform(obj_corners, scene_corners, H);
-            
-            line( img_scene, scene_corners[0], 
-                  scene_corners[1], Scalar(0, 255, 0), 4 );
-            line( img_scene, scene_corners[1], 
-                    scene_corners[2], Scalar( 0, 255, 0), 4 );
-            line( img_scene, scene_corners[2], 
-                    scene_corners[3], Scalar( 0, 255, 0), 4 );
-            line( img_scene, scene_corners[3], 
-                    scene_corners[0], Scalar( 0, 255, 0), 4 );
-            //-- Show detected matches
-            imshow("Object detection", img_scene);
+
+                //-- Get the corners from the image_1 ( the object to be "detected" )
+                std::vector<Point2f> scene_corners(4);
+                perspectiveTransform(obj_corners, scene_corners, H);
+                
+                line( img_scene, scene_corners[0], 
+                      scene_corners[1], Scalar(0, 255, 0), 4 );
+                line( img_scene, scene_corners[1], 
+                        scene_corners[2], Scalar( 0, 255, 0), 4 );
+                line( img_scene, scene_corners[2], 
+                        scene_corners[3], Scalar( 0, 255, 0), 4 );
+                line( img_scene, scene_corners[3], 
+                        scene_corners[0], Scalar( 0, 255, 0), 4 );
+                //-- Show detected matches
+                imshow("Object detection", img_scene); 
+
+            } else {
+               imshow("Object detection", img_scene);
+            }
         } else {
-            imshow("Object detection", img_scene);
+               imshow("Object detection", img_scene);
         }
         char ch =  waitKey(1);
         if (ch == 27) break;

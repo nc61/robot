@@ -54,10 +54,8 @@ int main(int argc, char** argv)
         msg.leftIR = readPin(SENSOR_IR_L_PIN); 
         msg.midIR = readPin(SENSOR_IR_M_PIN);
         msg.rightIR = readPin(SENSOR_IR_R_PIN);
-        ROS_INFO("Left IR: %d\tMiddle IR: %d\tRight IR: %d", msg.leftIR, msg.midIR, msg.rightIR);
-        ROS_INFO("IR Reading: %d", msg.leftIR);
+        ROS_INFO("Left: %d\tMid: %d\tRight: %d", msg.leftIR, msg.midIR, msg.rightIR);
         infraredSensor.publish(msg);
-        
         ros::spinOnce();
         loop_rate.sleep();
     }
@@ -71,11 +69,11 @@ uint16_t readPin(uint8_t channel)
     char response[2];
     maestro.read(response, 2);
 
-    uint16_t num_low = (uint16_t)(response[0]);
-    uint16_t num_high = (uint16_t)(response[1]);
+    uint16_t num_low = (unsigned char)response[0];
+    uint16_t num_high = (unsigned char)response[1];
     
-    ROS_INFO("num_low: %x\tnum_high: %x", num_low, num_high);
-    return num_low + num_high*256;
+    uint16_t num = num_low + 256*num_high;
+    return num;
 }
 
 void liftDirt()

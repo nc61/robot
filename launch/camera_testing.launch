@@ -1,0 +1,4 @@
+<launch>
+    <node name="RedDetect" pkg="robot" type="RedDetect" />
+    <node name="messages" pkg="rqt_console" type="rqt_console"/>
+</launch>

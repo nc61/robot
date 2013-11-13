@@ -1,0 +1,6 @@
+<launch>
+    <node name="Xmega" pkg="robot" type="Xmega" />
+    <node name="Maestro" pkg="robot" type="Maestro" />
+    <node name="SenseReact" pkg="robot" type="SenseReact" />
+    <node name="messages" pkg="rqt_console" type="rqt_console"/>
+</launch>

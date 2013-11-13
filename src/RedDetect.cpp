@@ -25,17 +25,16 @@ int main( int argc, char** argv )
     ros::Publisher colorPub = nh.advertise<std_msgs::Float32>("color_data", 1000);
     ros::Rate loop_rate(LOOP_RATE);
 
-
-
-    CvCapture* capture = cvCaptureFromCAM(0);
+    CvCapture* capture = cvCaptureFromCAM(1);
     IplImage* image = 0;
     IplImage* redTrack = 0;
+    
 
     float moment10;
     float area;
     float xpos;
 
-    while(true)
+    while(ros::ok())
     {
         image = cvQueryFrame(capture);
         redTrack = GetThresholdedImage(image);
@@ -46,6 +45,8 @@ int main( int argc, char** argv )
         moment10 = cvGetSpatialMoment(moments, 1, 0);
         area = cvGetCentralMoment(moments, 0, 0);
         xpos = moment10/area;
+        ROS_INFO("Area: %f", area);
+        ROS_INFO("x position: %f", xpos);
 
         std_msgs::Float32 msg;
         msg.data = xpos;
@@ -53,11 +54,11 @@ int main( int argc, char** argv )
 
         cvShowImage("Window", redTrack);
         int ch = cvWaitKey(1);
+        free(moments);
         loop_rate.sleep();
     }
 
     cvDestroyWindow("Window");
     cvReleaseCapture(&capture);
-
     return 0;
 }
