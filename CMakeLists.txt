@@ -38,6 +38,9 @@ target_link_libraries(SURF ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 add_executable(VidSURF src/VidSURF.cpp)
 target_link_libraries(VidSURF ${catkin_LIBRARIES} ${OpenCV_LIBS})
+
+add_executable(CharServo src/CharServo.cpp)
+target_link_libraries(CharServo ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
 #add_executable(XmegaTest src/XmegaTest.cpp)
 #target_link_libraries(XmegaTest ${catkin_LIBRARIES})
 

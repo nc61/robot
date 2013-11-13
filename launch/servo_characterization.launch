@@ -1,0 +1,4 @@
+<launch>
+    <node name="CharServo" pkg="robot" type="CharServo" />
+    <node name="messages" pkg="rqt_console" type="rqt_console"/>
+</launch>
