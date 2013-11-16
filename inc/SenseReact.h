@@ -10,6 +10,7 @@
 #define MID_FAR 160
 #define LEFT_FAR 200
 #define RIGHT_FAR 200
+#define FSR_THRESHOLD 2000
 #define GO_BACKWARD 1
 #define PIVOT_RIGHT 2
 #define PIVOT_LEFT 3

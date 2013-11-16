@@ -46,3 +46,6 @@ target_link_libraries(CalibrateCam ${catkin_LIBRARIES} ${OpenCV_LIBS})
 add_executable(XmegaTest test/XmegaTest.cpp)
 target_link_libraries(XmegaTest ${catkin_LIBRARIES})
 
+add_executable(TestMaestro test/TestMaestro.cpp)
+target_link_libraries(TestMaestro ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
+
