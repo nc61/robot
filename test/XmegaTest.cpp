@@ -1,7 +1,7 @@
 #include "ros/ros.h"
-#include "robot/motor.h"
 #include "std_msgs/Char.h"
 #include "robot/motor.h"
+#include "Common.h"
 
 void feedbackCallback(const std_msgs::Char::ConstPtr &msg);
 int main(int argc, char** argv)

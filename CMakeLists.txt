@@ -18,9 +18,9 @@ catkin_package(
 	CATKIN_DEPENDS message_runtime
 )
 
-## Declare a cpp executable
 include_directories(include ${catkin_INCLUDE_DIRS} /home/nick/catkin_ws/src/robot/inc/)
 
+#Main programs
 add_executable(Maestro src/Maestro.cpp)
 target_link_libraries(Maestro ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
 
@@ -33,18 +33,17 @@ target_link_libraries(SenseReact ${catkin_LIBRARIES})
 add_executable(RedDetect src/RedDetect.cpp)
 target_link_libraries(RedDetect ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
-add_executable(CalibrateCam src/CalibrateCam.cpp)
-target_link_libraries(CalibrateCam ${catkin_LIBRARIES} ${OpenCV_LIBS})
-
 add_executable(VidSURF src/VidSURF.cpp)
 target_link_libraries(VidSURF ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
-add_executable(SimpleServo src/SimpleServo.cpp)
+
+#Test programs
+add_executable(SimpleServo test/SimpleServo.cpp)
 target_link_libraries(SimpleServo ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
 
-#add_executable(XmegaTest src/XmegaTest.cpp)
-#target_link_libraries(XmegaTest ${catkin_LIBRARIES})
+add_executable(CalibrateCam test/CalibrateCam.cpp)
+target_link_libraries(CalibrateCam ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
-#add_executable(SerialTest src/SerialTest.cpp)
-#target_link_libraries(SerialTest ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
+add_executable(XmegaTest test/XmegaTest.cpp)
+target_link_libraries(XmegaTest ${catkin_LIBRARIES})
 

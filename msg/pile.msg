@@ -1,2 +1,2 @@
-float xpos
-float area
+float32 xpos
+float32 area

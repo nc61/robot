@@ -53,19 +53,19 @@ void avoid_obstacle()
     if (midIR > MID_VN)
     {
         ROS_WARN("Object in front");
-        stop();
         sendCommand(GO_BACKWARD, 70);
         while(midIR > MID_FAR) { ros::spinOnce(); }
-        stop();
         (leftIR > rightIR) ? sendCommand(PIVOT_RIGHT, 70) : sendCommand(PIVOT_LEFT, 70) ; 
-        while (midIR > MID_FAR){ ros::spinOnce(); }
+        for (int num_cycles = 0; num_cycles < 10; num_cycles++)
+        { 
+            avoid_obstacle();
+            ros::spinOnce(); 
+        }
     } else if (leftIR > LEFT_VN) {
-        stop();
         ROS_WARN("Object to left");
         sendCommand(PIVOT_RIGHT, 70);
         while (leftIR > LEFT_FAR) { ros::spinOnce(); }
     } else if (rightIR > RIGHT_VN) {
-        stop();
         ROS_WARN("Object to right");
         sendCommand(PIVOT_LEFT, 70);
         while (rightIR > RIGHT_FAR) { ros::spinOnce(); }

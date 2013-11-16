@@ -65,10 +65,9 @@ int main(int argc, char** argv)
         
 //        ROS_INFO("Left: %d\tMid: %d\tRight: %d", msgIR.leftIR, msgIR.midIR, msgIR.rightIR);
   //      ROS_INFO("FSR: %d/n", msgFSR.data);
-        ROS_INFO("mid: %d\n", msgIR.midIR);
         infraredSensor.publish(msgIR);
         FSRSensor.publish(msgFSR);
-
+        
         ros::spinOnce();
         loop_rate.sleep();
     }
@@ -82,7 +81,6 @@ uint16_t readPin(uint8_t channel)
    
     char response[2];
     maestro.read(response, 2);
-    printf("%c%c", response[0], response[1]);
 
     uint16_t num_low = (unsigned char)response[0];
     uint16_t num_high = (unsigned char)response[1];
