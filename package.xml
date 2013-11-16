@@ -7,7 +7,7 @@
  
   <maintainer email="nc61@ufl.edu">Nick</maintainer>
   <license>BSD</license>
-  <url type="website">https://github.com/nc61/Robot</url>
+  <url type="website">https://github.com/nc61/robot</url>
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>SerialStream</build_depend>
