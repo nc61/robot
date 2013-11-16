@@ -8,17 +8,16 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs genmsg)
 find_package(OpenCV REQUIRED)
 
 ## Declare ROS messages and services
-add_message_files(DIRECTORY msg FILES IR.msg motor.msg pile.msg)
-
+add_message_files(DIRECTORY msg FILES pile.msg IR.msg motor.msg)
 
 ## Generate added messages and services
-generate_messages(DEPENDENCIES std_msgs)
+generate_messages(DEPENDENCIES std_msgs robot)
 
 catkin_package(
 	CATKIN_DEPENDS message_runtime
 )
 
-include_directories(include ${catkin_INCLUDE_DIRS} /home/nick/catkin_ws/src/robot/inc/)
+include_directories(include ${catkin_INCLUDE_DIRS} /home/linaro/catkin_ws/src/robot/inc/)
 
 #Main programs
 add_executable(Maestro src/Maestro.cpp)

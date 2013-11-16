@@ -1,11 +1,11 @@
 #include <string>
 #include <stdlib.h>
 #include "std_msgs/UInt8.h"
-#include "robot/IR.h"
 #include "ros/ros.h"
 #include "Maestro.h"
 #include <SerialStream.h>
 #include "Common.h"
+#include "robot/IR.h"
 using namespace LibSerial;
 
 /***************************************************************
