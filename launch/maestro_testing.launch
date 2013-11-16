@@ -1,0 +1,4 @@
+<launch>
+    <node name="Maestro" pkg="robot" type="Maestro" />
+    <node name="messages" pkg="rqt_console" type="rqt_console"/>
+</launch>

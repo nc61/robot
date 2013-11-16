@@ -9,11 +9,12 @@
 using namespace LibSerial;
 
 /***************************************************************
- * Description: This node continously reads IR sensors at 10Hz while
+ * Description: This node continously reads IR and FSR sensors at 10Hz while
  *      receiving and interpreting servo commands.
- *************************"*************************************/
+ **************************************************************/
 
 SerialStream maestro;
+ros::Publisher maestroFeedback;
 
 int main(int argc, char** argv)
 {
@@ -38,27 +39,40 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "Maestro");
     ros::NodeHandle nh;
     ros::Rate loop_rate(LOOP_RATE);
-    
+    ros::Rate delay_rate(.2);
     //Publisher
     ros::Publisher infraredSensor = nh.advertise<robot::IR>("sensor_data", 1000);
-    loop_rate.sleep();
+                   maestroFeedback = nh.advertise<std_msgs::UInt8>("maestro_feedback", 1);
+    ros::Publisher FSRSensor = nh.advertise<std_msgs::UInt8>("fsr_data", 1);
+    loop_rate.sleep(); 
     //Subscriber
     ros::Subscriber servoControl = nh.subscribe<std_msgs::UInt8>("servo_command", 1000, servoCallback);
     
      //Initialize servos
+    
+    delay_rate.sleep();
     servoInit();
     
     while(ros::ok())
     {
-        robot::IR msg;
-        msg.leftIR = readPin(SENSOR_IR_L_PIN); 
-        msg.midIR = readPin(SENSOR_IR_M_PIN);
-        msg.rightIR = readPin(SENSOR_IR_R_PIN);
-        ROS_INFO("Left: %d\tMid: %d\tRight: %d", msg.leftIR, msg.midIR, msg.rightIR);
-        infraredSensor.publish(msg);
+        robot::IR msgIR;
+        msgIR.leftIR = readPin(SENSOR_IR_L_PIN); 
+        msgIR.midIR = readPin(SENSOR_IR_M_PIN);
+        msgIR.rightIR = readPin(SENSOR_IR_R_PIN);
+
+        std_msgs::UInt8 msgFSR;
+        msgFSR.data = readPin(SENSOR_FSR_PIN);
+        
+//        ROS_INFO("Left: %d\tMid: %d\tRight: %d", msgIR.leftIR, msgIR.midIR, msgIR.rightIR);
+  //      ROS_INFO("FSR: %d/n", msgFSR.data);
+        ROS_INFO("mid: %d\n", msgIR.midIR);
+        infraredSensor.publish(msgIR);
+        FSRSensor.publish(msgFSR);
+
         ros::spinOnce();
         loop_rate.sleep();
     }
+    servoInit();
 }
 
 uint16_t readPin(uint8_t channel)
@@ -68,6 +82,7 @@ uint16_t readPin(uint8_t channel)
    
     char response[2];
     maestro.read(response, 2);
+    printf("%c%c", response[0], response[1]);
 
     uint16_t num_low = (unsigned char)response[0];
     uint16_t num_high = (unsigned char)response[1];
@@ -80,63 +95,126 @@ void liftDirt()
 {
     char cmd_pos_bucket[] =   {0x84, SERVO_BUCKET_PIN, 
                               (SERVO_BUCKET_LIFT_POS & 0x7F), 
-                              ((SERVO_BUCKET_LIFT_POS << 7) & 0x7F) };
+                              ((SERVO_BUCKET_LIFT_POS >> 7) & 0x7F) };
     
     maestro.write(cmd_pos_bucket, sizeof(cmd_pos_bucket));
-    ROS_INFO("Lifting dirt");
-}
-
-void raiseBucket()
-{
-    char cmd_pos_arms[] =     {0x9F, 2, SERVO_ARM_L_PIN, 
-                              (SERVO_ARM_RAISE_POS & 0x7F), 
-                              ((SERVO_ARM_RAISE_POS << 7) & 0x7F), 
-                              (SERVO_ARM_RAISE_POS & 0x7F), 
-                              ((SERVO_ARM_RAISE_POS << 7) & 0x7F), 
-                              };
+    
+    char cmd_pos_arms[] =     {0x84, SERVO_ARM_PIN, 
+                              (SERVO_ARM_LIFT_POS & 0x7F), 
+                              ((SERVO_ARM_LIFT_POS >> 7) & 0x7F) };
+    
     
     maestro.write(cmd_pos_arms, sizeof(cmd_pos_arms));
-    ROS_INFO("Raising bucket");
     
+    ROS_INFO("Lifting dirt");
+    wait_until_position(SERVO_BUCKET_PIN, SERVO_BUCKET_LIFT_POS);
+    wait_until_position(SERVO_ARM_PIN, SERVO_ARM_LIFT_POS);
+    sendFeedback(DONE_LIFTING);
+
+}
+
+void dumpDirt()
+{
+    char cmd_pos_bucket[] =   {0x84, SERVO_BUCKET_PIN, 
+                              (SERVO_BUCKET_DUMP_POS & 0x7F), 
+                              ((SERVO_BUCKET_DUMP_POS >> 7) & 0x7F) };
+    
+    maestro.write(cmd_pos_bucket, sizeof(cmd_pos_bucket));
+    
+    char cmd_pos_arms[] =   {0x84, SERVO_ARM_PIN, 
+                              (SERVO_ARM_DUMP_POS & 0x7F), 
+                              ((SERVO_ARM_DUMP_POS >> 7) & 0x7F) };
+    
+    maestro.write(cmd_pos_arms, sizeof(cmd_pos_arms));
+    
+    ROS_INFO("Dumping dirt");
+    wait_until_position(SERVO_BUCKET_PIN, SERVO_BUCKET_DUMP_POS);
+    wait_until_position(SERVO_ARM_PIN, SERVO_ARM_DUMP_POS);
+    sendFeedback(DONE_DUMPING);
+}
+
+void lowerBucket()
+{
+    
+    char cmd_pos_bucket[] =   {0x84, SERVO_BUCKET_PIN, 
+                              (SERVO_BUCKET_BASE_POS & 0x7F), 
+                              ((SERVO_BUCKET_BASE_POS >> 7) & 0x7F) };
+    
+    maestro.write(cmd_pos_bucket, sizeof(cmd_pos_bucket));
+    
+    char cmd_pos_arms[] =     {0x84, SERVO_ARM_PIN, 
+                              (SERVO_ARM_BASE_POS & 0x7F), 
+                              ((SERVO_ARM_BASE_POS >> 7) & 0x7F) };
+    
+    
+    maestro.write(cmd_pos_arms, sizeof(cmd_pos_arms));
+    
+    ROS_INFO("Lowering bucket");
+    wait_until_position(SERVO_ARM_PIN, SERVO_ARM_BASE_POS);
+    sendFeedback(DONE_LOWERING);
 }
 
 void servoInit()
 {
-    char cmd_speed_larm[] =   {0x87, SERVO_ARM_L_PIN, 
-                              (SERVO_ARM_SPEED & 0x7F), 
-                              ((SERVO_ARM_SPEED << 7) & 0x7F)
-                              };
-    
-    maestro.write(cmd_speed_larm, sizeof(cmd_speed_larm));
-    
-    char cmd_speed_rarm[] =   {0x87, SERVO_ARM_R_PIN, 
-                              (SERVO_ARM_SPEED & 0x7F), 
-                              ((SERVO_ARM_SPEED << 7) & 0x7F)
-                              };
-    
-    maestro.write(cmd_speed_rarm, sizeof(cmd_speed_rarm));
-    
-    char cmd_pos_arms[] =     {0x9F, 2, SERVO_ARM_L_PIN,
+    ROS_INFO("Initializing Servos");
+    char cmd_pos_arms[] =     {0x84, SERVO_ARM_PIN, 
                               (SERVO_ARM_BASE_POS & 0x7F), 
-                              ((SERVO_ARM_BASE_POS << 7) & 0x7F), 
-                              (SERVO_ARM_BASE_POS & 0x7F), 
-                              ((SERVO_ARM_BASE_POS << 7) & 0x7F), 
-                              };
-    
+                              ((SERVO_ARM_BASE_POS >> 7) & 0x7F) }; 
+                              
     maestro.write(cmd_pos_arms, sizeof(cmd_pos_arms));
+    getError(1);
+    ROS_INFO("%d",SERVO_ARM_BASE_POS);
     
-    char cmd_speed_bucket[] = {0x87, SERVO_BUCKET_PIN, 
-                              (SERVO_BUCKET_SPEED & 0x7F), 
-                              ((SERVO_BUCKET_SPEED << 7) & 0x7F) };
+    char cmd_speed_arm[] =    {0x87, SERVO_ARM_PIN, 
+                              (SERVO_ARM_SPEED_FAST & 0x7F), 
+                              ((SERVO_ARM_SPEED_FAST >> 7) & 0x7F)
+                              };
     
-    maestro.write(cmd_speed_bucket, sizeof(cmd_speed_bucket));
+    maestro.write(cmd_speed_arm, sizeof(cmd_speed_arm));
+    getError(2);
+    
     
     char cmd_pos_bucket[] =   {0x84, SERVO_BUCKET_PIN, 
                               (SERVO_BUCKET_BASE_POS & 0x7F), 
-                              ((SERVO_BUCKET_BASE_POS << 7) & 0x7F) };
+                              ((SERVO_BUCKET_BASE_POS >> 7) & 0x7F) };
     
     maestro.write(cmd_pos_bucket, sizeof(cmd_pos_bucket));
+    getError(3);
+    
+    char cmd_speed_bucket[] = {0x87, SERVO_BUCKET_PIN, 
+                              (SERVO_BUCKET_SPEED_FAST & 0x7F), 
+                              ((SERVO_BUCKET_SPEED_FAST >> 7) & 0x7F) };
+    
+    maestro.write(cmd_speed_bucket, sizeof(cmd_speed_bucket));
+    getError(4);
+    wait_until_position(SERVO_BUCKET_PIN, SERVO_BUCKET_BASE_POS);
+    wait_until_position(SERVO_ARM_PIN, SERVO_ARM_BASE_POS);
+}
 
+void wait_until_position(uint8_t channel, uint16_t target)
+{
+    char cmd[] = {0x90, channel};
+    char response[2];
+    uint16_t pulse_time = 0;
+    ros::Rate loop_rate(LOOP_RATE);
+    ROS_INFO("target: %d\tchannel: %d\n", target, channel);
+    
+    while(abs(pulse_time - target) > 5)
+    {
+        maestro.write(cmd, sizeof(cmd));
+        maestro.read(response, sizeof(response));
+        pulse_time = readPin(channel);
+        ROS_INFO("Pulse time: %d\n", pulse_time);
+        loop_rate.sleep();
+    }
+    ROS_INFO("Channel %d is at position %d\n", channel, pulse_time);
+}
+
+void sendFeedback(uint8_t data)
+{
+    std_msgs::UInt8 msg;
+    msg.data = data;
+    maestroFeedback.publish(msg);
 }
 
 void getError(uint8_t location)
@@ -151,7 +229,10 @@ void getError(uint8_t location)
     error_num[0] = error_char[0];
     error_num[1] = error_char[1];
 
-    ROS_FATAL("Error code %x%x at location %d", error_num[0], error_num[1], location);
+    if (error_num[0] | error_num[1])
+    {
+        ROS_FATAL("Error code %x%x at location %d", error_num[0], error_num[1], location);
+    }
 }
 
 /******************************************************
@@ -163,7 +244,8 @@ void servoCallback(const std_msgs::UInt8::ConstPtr &msg)
     uint8_t command = msg->data;
     ROS_INFO("Received data %d", command);
     
-    if (command == 0){liftDirt();}
-    else if (command == 1){raiseBucket();}
+    if (command == LIFT_DIRT){ liftDirt(); }
+    else if (command == DUMP_DIRT){ dumpDirt(); }
+    else if (command == LOWER_BUCKET){ lowerBucket(); }
     else ROS_INFO("%d is not a valid command", command);
 }

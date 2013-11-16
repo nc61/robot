@@ -54,6 +54,11 @@ int main(int argc, char** argv)
             }
         }
     }
+
+    ROS_INFO("Stopping");
+    char cmd_stop_motors[] = {'s', 'n'};
+    xmega.write(cmd_stop_motors, sizeof(cmd_stop_motors));
+
 }
 
 void motorCallback(const robot::motor::ConstPtr &msg)

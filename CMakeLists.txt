@@ -8,7 +8,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs genmsg)
 find_package(OpenCV REQUIRED)
 
 ## Declare ROS messages and services
-add_message_files(DIRECTORY msg FILES IR.msg motor.msg)
+add_message_files(DIRECTORY msg FILES IR.msg motor.msg pile.msg)
 
 
 ## Generate added messages and services
@@ -33,14 +33,15 @@ target_link_libraries(SenseReact ${catkin_LIBRARIES})
 add_executable(RedDetect src/RedDetect.cpp)
 target_link_libraries(RedDetect ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
-add_executable(SURF src/SURF.cpp)
-target_link_libraries(SURF ${catkin_LIBRARIES} ${OpenCV_LIBS})
+add_executable(CalibrateCam src/CalibrateCam.cpp)
+target_link_libraries(CalibrateCam ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 add_executable(VidSURF src/VidSURF.cpp)
 target_link_libraries(VidSURF ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
-add_executable(CharServo src/CharServo.cpp)
-target_link_libraries(CharServo ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
+add_executable(SimpleServo src/SimpleServo.cpp)
+target_link_libraries(SimpleServo ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
+
 #add_executable(XmegaTest src/XmegaTest.cpp)
 #target_link_libraries(XmegaTest ${catkin_LIBRARIES})
 

@@ -16,9 +16,8 @@ void readme();
 /** @function main */
 int main( int argc, char** argv )
 {
-//   ros::init(argc, argv, "VidSURF");
-//   ros::NodeHandle nh;
-//   ros::Rate loop_rate(.1);
+   ros::init(argc, argv, "VidSURF");
+   ros::NodeHandle nh;
 
     if( argc != 2 )
     { 
@@ -26,7 +25,7 @@ int main( int argc, char** argv )
         return -1; 
     }
 
-    int minHessian = 400;
+    int minHessian = 200;
     Mat frame;
     Mat img_scene;
     Mat img_object;
@@ -38,7 +37,7 @@ int main( int argc, char** argv )
         return -1; 
     }
     
-    VideoCapture capture(1);
+    VideoCapture capture(0);
     if (!capture.isOpened())
     {
         std::cout << "Error opening camera" << std::endl;
@@ -107,7 +106,7 @@ int main( int argc, char** argv )
 
             for( int i = 0; i < descriptors_object.rows; i++ )
             { 
-                if(matches[i].distance <= 3*min_dist) 
+                if(matches[i].distance <= 2*min_dist) 
                     {good_matches.push_back( matches[i]);}
             }
 
@@ -120,18 +119,18 @@ int main( int argc, char** argv )
             { 
                 for( int i = 0; i < good_matches.size(); i++ )
                 {
-                    //-- Get the keypoints from the good matches
+                    //Get the keypoints from the good matches
                     obj.push_back(keypoints_object[good_matches[i].queryIdx].pt);
                     scene.push_back(keypoints_scene[good_matches[i].trainIdx].pt );
                 }
                 
-                
                 Mat H = findHomography( obj, scene, CV_RANSAC );
 
-
-                //-- Get the corners from the image_1 ( the object to be "detected" )
+                //Get the corners from the image_1 ( the object to be "detected" )
                 std::vector<Point2f> scene_corners(4);
                 perspectiveTransform(obj_corners, scene_corners, H);
+
+                //Publish the x coordinate of the center of the box;
                 
                 line( img_scene, scene_corners[0], 
                       scene_corners[1], Scalar(0, 255, 0), 4 );

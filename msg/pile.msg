@@ -1,0 +1,2 @@
+float xpos
+float area

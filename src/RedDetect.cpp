@@ -22,26 +22,28 @@ int main( int argc, char** argv )
 {
     ros::init(argc, argv, "openCV");
     ros::NodeHandle nh;
-    ros::Publisher colorPub = nh.advertise<std_msgs::Float32>("color_data", 1000);
+    ros::Publisher colorPub = nh.advertise<std_msgs::Float32>("color_data", 3);
     ros::Rate loop_rate(LOOP_RATE);
 
     CvCapture* capture = cvCaptureFromCAM(1);
     IplImage* image = 0;
     IplImage* redTrack = 0;
-    
 
     float moment10;
     float area;
     float xpos;
+    CvMoments *moments = (CvMoments*)malloc(sizeof(CvMoments));
 
     while(ros::ok())
     {
+        //Capture fram
         image = cvQueryFrame(capture);
-        redTrack = GetThresholdedImage(image);
-        
-        CvMoments *moments = (CvMoments*)malloc(sizeof(CvMoments));
-        cvMoments(redTrack, moments, 1);
 
+        //Remove all colors but those in range
+        redTrack = GetThresholdedImage(image);
+       
+        //Calculate the moments, area, x-position
+        cvMoments(redTrack, moments, 1);
         moment10 = cvGetSpatialMoment(moments, 1, 0);
         area = cvGetCentralMoment(moments, 0, 0);
         xpos = moment10/area;
@@ -54,10 +56,10 @@ int main( int argc, char** argv )
 
         cvShowImage("Window", redTrack);
         int ch = cvWaitKey(1);
-        free(moments);
         loop_rate.sleep();
     }
 
+    free(moments);
     cvDestroyWindow("Window");
     cvReleaseCapture(&capture);
     return 0;

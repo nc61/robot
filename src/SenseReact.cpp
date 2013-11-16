@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 
     while(ros::ok())
     {
-        //In wander mode, robot moves forward with a duty cycle of 30
+        //In wander mode, robot moves forward with a duty cycle of 70
         if (mode == WANDER)
         {
             if ((midIR > MID_VN) || (leftIR > LEFT_VN) || (rightIR > RIGHT_VN))
