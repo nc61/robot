@@ -39,7 +39,6 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "Maestro");
     ros::NodeHandle nh;
     ros::Rate loop_rate(LOOP_RATE);
-    ros::Rate delay_rate(.2);
     //Publisher
     ros::Publisher infraredSensor = nh.advertise<robot::IR>("sensor_data", 1000);
                    maestroFeedback = nh.advertise<std_msgs::UInt8>("maestro_feedback", 1);
@@ -48,11 +47,7 @@ int main(int argc, char** argv)
     //Subscriber
     ros::Subscriber servoControl = nh.subscribe<std_msgs::UInt8>("servo_command", 1000, servoCallback);
     
-     //Initialize servos
-    
-    delay_rate.sleep();
-    servoInit();
-    
+    //Initialize servos
     while(ros::ok())
     {
         robot::IR msgIR;
@@ -245,5 +240,7 @@ void servoCallback(const std_msgs::UInt8::ConstPtr &msg)
     if (command == LIFT_DIRT){ liftDirt(); }
     else if (command == DUMP_DIRT){ dumpDirt(); }
     else if (command == LOWER_BUCKET){ lowerBucket(); }
+    else if (command == SERVO_INIT){ servoInit(); }
     else ROS_INFO("%d is not a valid command", command);
+
 }

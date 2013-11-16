@@ -4,10 +4,10 @@
 #include "robot/IR.h"
 
 #define WANDER 0
-#define MID_VN 375
+#define MID_VN 175
 #define LEFT_VN 375
 #define RIGHT_VN 375
-#define MID_FAR 200
+#define MID_FAR 160
 #define LEFT_FAR 200
 #define RIGHT_FAR 200
 #define GO_BACKWARD 1

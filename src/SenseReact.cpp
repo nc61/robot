@@ -16,6 +16,7 @@ char wait;
 
 //Establish global scope for publisher
 ros::Publisher motorPub;
+ros::Publisher servoPub;
 
 int main(int argc, char** argv)
 {
@@ -24,10 +25,16 @@ int main(int argc, char** argv)
     ros::Rate loop_rate(LOOP_RATE);
     //Publisher
     motorPub = nh.advertise<robot::motor>("motor_command", 1000);
+    servoPub = nh.advertise<std_msgs::UInt8>("servo_command", 1);
     loop_rate.sleep();
     //Subscriber
     ros::Subscriber IRSub = nh.subscribe<robot::IR>("sensor_data", 2, processIR);
     ros::Subscriber xmegaSub = nh.subscribe<std_msgs::UInt8>("xmega_feedback", 1, xmegaFeedback);
+
+    //initialize servos
+    std_msgs::UInt8 msg;
+    msg.data = SERVO_INIT;
+    servoPub.publish(msg);
 
     while(ros::ok())
     {
@@ -47,7 +54,7 @@ int main(int argc, char** argv)
 }
 
 //Description: avoids an obstacle
-//Calls: stop(), sendCommand()
+//Calls: stop(), sendCommand(), avoid_obstacle()
 void avoid_obstacle()
 {
     if (midIR > MID_VN)
@@ -58,6 +65,7 @@ void avoid_obstacle()
         (leftIR > rightIR) ? sendCommand(PIVOT_RIGHT, 70) : sendCommand(PIVOT_LEFT, 70) ; 
         for (int num_cycles = 0; num_cycles < 10; num_cycles++)
         { 
+            sendCommand(GO_FORWARD, 75);
             avoid_obstacle();
             ros::spinOnce(); 
         }

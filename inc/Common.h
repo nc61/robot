@@ -6,6 +6,7 @@
 #define LIFT_DIRT    0
 #define DUMP_DIRT    1
 #define LOWER_BUCKET 2
+#define SERVO_INIT   3
 
 #define DONE_LIFTING  0
 #define DONE_DUMPING  1
