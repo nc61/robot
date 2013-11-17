@@ -5,7 +5,7 @@
 #include "Maestro.h"
 #include <SerialStream.h>
 #include "Common.h"
-#include "robot/IR.h"
+#include "robot/sensors.h"
 using namespace LibSerial;
 
 /***************************************************************
@@ -40,29 +40,24 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
     ros::Rate loop_rate(LOOP_RATE);
     //Publisher
-    ros::Publisher infraredSensor = nh.advertise<robot::IR>("sensor_data", 1000);
+    ros::Publisher sensorPub = nh.advertise<robot::sensors>("sensor_data", 1);
                    maestroFeedback = nh.advertise<std_msgs::UInt8>("maestro_feedback", 1);
-    ros::Publisher FSRSensor = nh.advertise<std_msgs::UInt8>("fsr_data", 1);
     loop_rate.sleep(); 
     //Subscriber
-    ros::Subscriber servoControl = nh.subscribe<std_msgs::UInt8>("servo_command", 1000, servoCallback);
+    ros::Subscriber servoControl = nh.subscribe<std_msgs::UInt8>("servo_command", 1, servoCallback);
     
     //Initialize servos
     while(ros::ok())
     {
-        robot::IR msgIR;
-        msgIR.leftIR = readPin(SENSOR_IR_L_PIN); 
-        msgIR.midIR = readPin(SENSOR_IR_M_PIN);
-        msgIR.rightIR = readPin(SENSOR_IR_R_PIN);
-
-        std_msgs::UInt8 msgFSR;
-        msgFSR.data = readPin(SENSOR_FSR_PIN);
+        robot::sensors msg;
+        msg.leftIR = readPin(SENSOR_IR_L_PIN); 
+        msg.midIR = readPin(SENSOR_IR_M_PIN);
+        msg.rightIR = readPin(SENSOR_IR_R_PIN);
+        msg.FSR = readPin(SENSOR_FSR_PIN);
         
-//        ROS_INFO("Left: %d\tMid: %d\tRight: %d", msgIR.leftIR, msgIR.midIR, msgIR.rightIR);
-  //      ROS_INFO("FSR: %d/n", msgFSR.data);
-        infraredSensor.publish(msgIR);
-        FSRSensor.publish(msgFSR);
-        
+        ROS_INFO("Left: %d\tMid: %d\tRight: %d", msg.leftIR, msg.midIR, msg.rightIR);
+        ROS_INFO("FSR: %d/n", msg.FSR);
+        sensorPub.publish(msg);
         ros::spinOnce();
         loop_rate.sleep();
     }
@@ -145,6 +140,16 @@ void lowerBucket()
     ROS_INFO("Lowering bucket");
     wait_until_position(SERVO_ARM_PIN, SERVO_ARM_BASE_POS);
     sendFeedback(DONE_LOWERING);
+}
+
+void digBucket()
+{
+    char cmd_pos_bucket[] =   {0x84, SERVO_BUCKET_PIN, 
+                              (SERVO_BUCKET_DIG_POS & 0x7F), 
+                              ((SERVO_BUCKET_DIG_POS >> 7) & 0x7F) };
+    maestro.write(cmd_pos_bucket, sizeof(cmd_pos_bucket));
+
+    ROS_INFO("Digging into pile");
 }
 
 void servoInit()
@@ -241,6 +246,7 @@ void servoCallback(const std_msgs::UInt8::ConstPtr &msg)
     else if (command == DUMP_DIRT){ dumpDirt(); }
     else if (command == LOWER_BUCKET){ lowerBucket(); }
     else if (command == SERVO_INIT){ servoInit(); }
+    else if (command == DIG_BUCKET){ digBucket(); }
     else ROS_INFO("%d is not a valid command", command);
 
 }

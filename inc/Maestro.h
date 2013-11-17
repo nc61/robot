@@ -21,6 +21,7 @@
 #define SERVO_BUCKET_DUMP_POS 3336
 #define SERVO_BUCKET_SPEED 5
 #define SERVO_BUCKET_SPEED_FAST 20
+#define SERVO_BUCKET_DIG_POS 10000
 
 
 uint16_t readPin(uint8_t channel);
@@ -31,6 +32,7 @@ void raiseBucket();
 void serialInit();
 void getError(uint8_t location);
 void dumpDirt();
+void digBucket();
 void lowerBucket();
 void wait_until_position(uint8_t channel, uint16_t target);
 void sendFeedback(uint8_t data);

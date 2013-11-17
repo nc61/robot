@@ -1,4 +1,4 @@
 <launch>
-    <node name="NavToColor" pkg="robot" type="NavToColor" />
+    <node name="FindColor" pkg="robot" type="FindColor" />
     <node name="messages" pkg="rqt_console" type="rqt_console"/>
 </launch>

@@ -9,7 +9,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs
 find_package(OpenCV REQUIRED)
 
 ## Declare ROS messages and services
-add_message_files(DIRECTORY msg FILES pile.msg IR.msg motor.msg color.msg)
+add_message_files(DIRECTORY msg FILES pile.msg sensors.msg motor.msg color.msg)
 
 ## Generate added messages and services
 generate_messages(DEPENDENCIES std_msgs)
@@ -22,8 +22,8 @@ catkin_package(
 include_directories(include ${catkin_INCLUDE_DIRS} /home/nick/catkin_ws/src/robot/inc/)
 
 #Main programs
-#add_executable(Maestro src/Maestro.cpp)
-#target_link_libraries(Maestro ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
+add_executable(Maestro src/Maestro.cpp)
+target_link_libraries(Maestro ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
 
 #add_executable(Xmega src/Xmega.cpp)
 #target_link_libraries(Xmega ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
@@ -53,3 +53,6 @@ target_link_libraries(CalibrateCam ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 add_executable(FindColor test/FindColor.cpp)
 target_link_libraries(FindColor ${catkin_LIBRARIES} ${OpenCV_LIBS})
+
+add_executable(NavToColor test/NavToColor.cpp)
+target_link_libraries(NavToColor ${catkin_LIBRARIES} ${OpenCV_LIBS})
