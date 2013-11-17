@@ -2,6 +2,7 @@
 #define SENSE_REACT_H
 
 #include "robot/IR.h"
+#include "std_msgs/UInt8.h"
 
 #define WANDER 0
 #define MID_VN 175

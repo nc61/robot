@@ -60,7 +60,7 @@ int main( int argc, char** argv )
         ROS_INFO("Hue: %d-%d\tSat: %d-%d\tVal: %d-%d\n", hue_low, hue_high, sat_low, sat_high, val_low, val_high);
 
         cvShowImage("Window", redTrack);
-        char ch = cvWaitKey(10);
+        char ch = cvWaitKey(100);
         switch (ch)
         {
             //hue
