@@ -15,6 +15,7 @@ using namespace LibSerial;
 
 SerialStream maestro;
 ros::Publisher maestroFeedback;
+ros::Publisher sensorPub;
 
 int main(int argc, char** argv)
 {
@@ -40,8 +41,8 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
     ros::Rate loop_rate(LOOP_RATE);
     //Publisher
-    ros::Publisher sensorPub = nh.advertise<robot::sensors>("sensor_data", 1);
-                   maestroFeedback = nh.advertise<std_msgs::UInt8>("maestro_feedback", 1);
+    sensorPub = nh.advertise<robot::sensors>("sensor_data", 1);
+    maestroFeedback = nh.advertise<std_msgs::UInt8>("maestro_feedback", 1);
     loop_rate.sleep(); 
     //Subscriber
     ros::Subscriber servoControl = nh.subscribe<std_msgs::UInt8>("servo_command", 1, servoCallback);
@@ -246,7 +247,8 @@ void servoCallback(const std_msgs::UInt8::ConstPtr &msg)
     else if (command == DUMP_DIRT){ dumpDirt(); }
     else if (command == LOWER_BUCKET){ lowerBucket(); }
     else if (command == SERVO_INIT){ servoInit(); }
-    else if (command == DIG_BUCKET){ digBucket(); }
+    else if (command == DIG_BUCKET){ digBucket(); ROS_INFO("Received command to dig bucket"); }
+
     else ROS_INFO("%d is not a valid command", command);
 
 }

@@ -1,7 +1,7 @@
 #include "ros/ros.h"
 #include <stdlib.h>
 #include "robot/motor.h"
-#include "robot/IR.h"
+#include "robot/sensors.h"
 #include "std_msgs/UInt8.h"
 #include "std_msgs/Char.h"
 #include "SenseReact.h"
@@ -28,7 +28,7 @@ int main(int argc, char** argv)
     servoPub = nh.advertise<std_msgs::UInt8>("servo_command", 1);
     loop_rate.sleep();
     //Subscriber
-    ros::Subscriber IRSub = nh.subscribe<robot::IR>("sensor_data", 2, processIR);
+    ros::Subscriber maestroSub = nh.subscribe<robot::sensors>("sensor_data", 2, processSensors);
     ros::Subscriber xmegaSub = nh.subscribe<std_msgs::UInt8>("xmega_feedback", 1, xmegaFeedback);
 
     //initialize servos
@@ -46,7 +46,7 @@ int main(int argc, char** argv)
                 avoid_obstacle();
             }
 
-            sendCommand(GO_FORWARD, 75);
+            sendMotorCommand(GO_FORWARD, 70);
             ros::spinOnce();
         }
         loop_rate.sleep();
@@ -54,28 +54,23 @@ int main(int argc, char** argv)
 }
 
 //Description: avoids an obstacle
-//Calls: stop(), sendCommand(), avoid_obstacle()
+//Calls: stop(), sendMotorCommand(), avoid_obstacle()
 void avoid_obstacle()
 {
     if (midIR > MID_VN)
     {
         ROS_WARN("Object in front");
-        sendCommand(GO_BACKWARD, 70);
+        sendMotorCommand(GO_BACKWARD, 70);
         while(midIR > MID_FAR) { ros::spinOnce(); }
-        (leftIR > rightIR) ? sendCommand(PIVOT_RIGHT, 70) : sendCommand(PIVOT_LEFT, 70) ; 
-        for (int num_cycles = 0; num_cycles < 10; num_cycles++)
-        { 
-            sendCommand(GO_FORWARD, 75);
-            avoid_obstacle();
-            ros::spinOnce(); 
-        }
+        (leftIR > rightIR) ? sendMotorCommand(PIVOT_RIGHT, 70) : sendMotorCommand(PIVOT_LEFT, 70) ; 
+        while(midIR > MID_VF){ ros::spinOnce(); }
     } else if (leftIR > LEFT_VN) {
         ROS_WARN("Object to left");
-        sendCommand(PIVOT_RIGHT, 70);
+        sendMotorCommand(PIVOT_RIGHT, 70);
         while (leftIR > LEFT_FAR) { ros::spinOnce(); }
     } else if (rightIR > RIGHT_VN) {
         ROS_WARN("Object to right");
-        sendCommand(PIVOT_LEFT, 70);
+        sendMotorCommand(PIVOT_LEFT, 70);
         while (rightIR > RIGHT_FAR) { ros::spinOnce(); }
     }
 }
@@ -94,7 +89,7 @@ void stop()
 }
 
 //Description: Sends a command to the motor controller
-void sendCommand(uint8_t command, uint8_t duty_cycle)
+void sendMotorCommand(uint8_t command, uint8_t duty_cycle)
 {
     robot::motor msg;
     msg.command = command;
@@ -108,7 +103,7 @@ void sendCommand(uint8_t command, uint8_t duty_cycle)
 
 //Description: updates global variables (sensor information)
 //Called by: spinOnce()
-void processIR(const robot::IR::ConstPtr &msg)
+void processSensors(const robot::sensors::ConstPtr &msg)
 {
     leftIR = msg->leftIR;
     midIR = msg->midIR;
@@ -122,4 +117,3 @@ void xmegaFeedback(const std_msgs::UInt8::ConstPtr &msg)
     wait = msg->data;
     ROS_INFO("wait value: %d", wait);
 }
-

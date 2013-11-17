@@ -5,10 +5,11 @@
 #include "std_msgs/UInt8.h"
 
 #define WANDER 0
-#define MID_VN 175
+#define MID_VN 375 
 #define LEFT_VN 375
 #define RIGHT_VN 375
-#define MID_FAR 160
+#define MID_FAR 200
+#define MID_VF 125
 #define LEFT_FAR 200
 #define RIGHT_FAR 200
 #define FSR_THRESHOLD 50
@@ -22,6 +23,7 @@
 #define XPOS_PILE_RIGHT_LIMIT 350
 #define AREA_PILE_THRESH 3000000
 #define AREA_PILE_LOW 1000000
+#define AREA_PILE_CLOSE 10000000
 #define PILE_IR_THRESH 175 
 
 

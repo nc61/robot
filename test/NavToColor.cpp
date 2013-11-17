@@ -53,14 +53,14 @@ int main(int argc, char** argv)
                 ros::spinOnce();
             }
             sendMotorCommand(GO_FORWARD, 70);
-            while (area < AREA_PILE_CLOSE)
+            while (area_pile < AREA_PILE_CLOSE)
             { 
                 avoid_obstacle();
                 ros::spinOnce();
             }
+            stop();
             sendServoCommand(DIG_BUCKET);
             while (FSR < FSR_THRESHOLD) { ros::spinOnce(); }
-            stop();
             sendServoCommand(LIFT_DIRT);
 
         } else if (area_pile > AREA_PILE_LOW) {
@@ -81,13 +81,8 @@ void avoid_obstacle()
         ROS_WARN("Object in front");
         sendMotorCommand(GO_BACKWARD, 70);
         while(midIR > MID_FAR) { ros::spinOnce(); }
-        (leftIR > rightIR) ? sendMotorCommand(PIVOT_RIGHT, 70) : sendMotorCommand(PIVOT_LEFT, 70) ; 
-        for (int num_cycles = 0; num_cycles < 10; num_cycles++)
-        { 
-            sendMotorCommand(GO_FORWARD, 75);
-            avoid_obstacle();
-            ros::spinOnce(); 
-        }
+        sendMotorCommand(PIVOT_RIGHT, 70);
+        while(midIR > MID_VF) { ros::spinOnce(); }
     } else if (leftIR > LEFT_VN) {
         ROS_WARN("Object to left");
         sendMotorCommand(PIVOT_RIGHT, 70);

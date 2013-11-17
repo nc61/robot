@@ -25,11 +25,11 @@ include_directories(include ${catkin_INCLUDE_DIRS} /home/nick/catkin_ws/src/robo
 add_executable(Maestro src/Maestro.cpp)
 target_link_libraries(Maestro ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
 
-#add_executable(Xmega src/Xmega.cpp)
-#target_link_libraries(Xmega ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
+add_executable(Xmega src/Xmega.cpp)
+target_link_libraries(Xmega ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
 
-#add_executable(SenseReact src/SenseReact.cpp)
-#target_link_libraries(SenseReact ${catkin_LIBRARIES})
+add_executable(SenseReact src/SenseReact.cpp)
+target_link_libraries(SenseReact ${catkin_LIBRARIES})
 
 add_executable(RedDetect src/RedDetect.cpp)
 target_link_libraries(RedDetect ${catkin_LIBRARIES} ${OpenCV_LIBS})
