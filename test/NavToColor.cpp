@@ -77,9 +77,11 @@ int main(int argc, char** argv)
 		loop_rate.sleep();
             }
 	    ROS_INFO("Near pile");
+            stop();
             sendServoCommand(DIG_BUCKET);
 	    sendMotorCommand(GO_FORWARD, 65);
             while (FSR < FSR_THRESHOLD) { ros::spinOnce(); }
+            stop();
 	    ROS_INFO("FSR value: %d", FSR);
 	    sendServoCommand(TILT_BACK_BUCKET);
 	    stop();
