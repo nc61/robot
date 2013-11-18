@@ -48,7 +48,6 @@ int main(int argc, char** argv)
             if (xpos_pile < XPOS_PILE_LEFT_LIMIT)
             {
 		ROS_INFO("xpos: %f", xpos_pile); 
-		stop();
                 sendMotorCommand(PIVOT_LEFT, 65);
 		while (xpos_pile < XPOS_PILE_LEFT_LIMIT)
 		{
@@ -78,10 +77,18 @@ int main(int argc, char** argv)
 		loop_rate.sleep();
             }
 	    ROS_INFO("Near pile");
-            stop();
             sendServoCommand(DIG_BUCKET);
+	    sendMotorCommand(GO_FORWARD, 65);
             while (FSR < FSR_THRESHOLD) { ros::spinOnce(); }
+	    ROS_INFO("FSR value: %d", FSR);
+	    sendServoCommand(TILT_BACK_BUCKET);
+	    stop();
+	    for(int i = 0; i < 5; i++){ loop_rate.sleep(); }
             sendServoCommand(LIFT_DIRT);
+	    for(int i = 0; i < 20; i++){ loop_rate.sleep(); }
+	    sendMotorCommand(GO_BACKWARD, 65);
+	    for(int i = 0; i < 30; i++){ loop_rate.sleep(); }
+	    
 	    return 0;
 
         } else { 

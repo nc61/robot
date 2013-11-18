@@ -82,18 +82,21 @@ uint16_t readPin(uint8_t channel)
 
 void liftDirt()
 {
+    char cmd_pos_arms[] =     {0x84, SERVO_ARM_PIN, 
+                              (SERVO_ARM_LIFT_POS & 0x7F), 
+                              ((SERVO_ARM_LIFT_POS >> 7) & 0x7F) };
+    
+    maestro.write(cmd_pos_arms, sizeof(cmd_pos_arms));
+    
+    ros::Rate delay500ms(2); 
+    delay500ms.sleep();
+
+    
     char cmd_pos_bucket[] =   {0x84, SERVO_BUCKET_PIN, 
                               (SERVO_BUCKET_LIFT_POS & 0x7F), 
                               ((SERVO_BUCKET_LIFT_POS >> 7) & 0x7F) };
     
     maestro.write(cmd_pos_bucket, sizeof(cmd_pos_bucket));
-    
-    char cmd_pos_arms[] =     {0x84, SERVO_ARM_PIN, 
-                              (SERVO_ARM_LIFT_POS & 0x7F), 
-                              ((SERVO_ARM_LIFT_POS >> 7) & 0x7F) };
-    
-    
-    maestro.write(cmd_pos_arms, sizeof(cmd_pos_arms));
     
     ROS_INFO("Lifting dirt");
     wait_until_position(SERVO_BUCKET_PIN, SERVO_BUCKET_LIFT_POS);
@@ -151,6 +154,16 @@ void digBucket()
     maestro.write(cmd_pos_bucket, sizeof(cmd_pos_bucket));
 
     ROS_INFO("Digging into pile");
+}
+
+void tiltBackBucket()
+{
+    char cmd_pos_bucket[] =   {0x84, SERVO_BUCKET_PIN, 
+                              (SERVO_BUCKET_TILT_BACK_POS & 0x7F), 
+                              ((SERVO_BUCKET_TILT_BACK_POS >> 7) & 0x7F) };
+    maestro.write(cmd_pos_bucket, sizeof(cmd_pos_bucket));
+
+    ROS_INFO("Tilting dirt into bucket");
 }
 
 void servoInit()
@@ -247,7 +260,8 @@ void servoCallback(const std_msgs::UInt8::ConstPtr &msg)
     else if (command == DUMP_DIRT){ dumpDirt(); }
     else if (command == LOWER_BUCKET){ lowerBucket(); }
     else if (command == SERVO_INIT){ servoInit(); }
-    else if (command == DIG_BUCKET){ digBucket(); ROS_INFO("Received command to dig bucket"); }
+    else if (command == DIG_BUCKET){ digBucket(); }
+    else if (command == TILT_BACK_BUCKET){ tiltBackBucket(); } 
 
     else ROS_INFO("%d is not a valid command", command);
 
