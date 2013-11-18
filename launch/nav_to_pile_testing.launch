@@ -1,0 +1,7 @@
+<launch>
+    <node name="FindColor" pkg="robot" type="FindColor" />
+    <node name="NavToColor" pkg="robot" type="NavToColor" />
+    <node name="Maestro" pkg="robot" type="Maestro" />
+    <node name="Xmega" pkg="robot" type="Xmega" />
+
+</launch>

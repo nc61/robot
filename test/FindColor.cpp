@@ -47,9 +47,5 @@ int main(int argc, char** argv)
         msg.xpos = xCenter;
         msg.area = area;
         colorPub.publish(msg);
-
-        cv::imshow("pile", hsvFrame);
-        cvWaitKey(1);
-        loop_rate.sleep();
     }
 }

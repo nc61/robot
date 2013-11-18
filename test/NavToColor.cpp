@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "robot/motor.h"
 #include "robot/sensors.h"
+#include "robot/color.h"
 #include "std_msgs/UInt8.h"
 #include "std_msgs/Char.h"
 #include "SenseReact.h"
@@ -33,6 +34,7 @@ int main(int argc, char** argv)
     //Subscriber
     ros::Subscriber maestroSub = nh.subscribe<robot::sensors>("sensor_data", 2, processSensors);
     ros::Subscriber xmegaSub = nh.subscribe<std_msgs::UInt8>("xmega_feedback", 1, xmegaFeedback);
+    ros::Subscriber colorSub = nh.subscribe<robot::color>("color_data", 1, processColor);
 
     //initialize servos
     sendServoCommand(SERVO_INIT);
@@ -41,33 +43,52 @@ int main(int argc, char** argv)
     {
         if (area_pile > AREA_PILE_THRESH)
         {
-            while(xpos_pile < XPOS_PILE_LEFT_LIMIT)
+	ROS_INFO("Area > AREA_PILE_THRESH (area = %f, xpos = %f)", area_pile, xpos_pile);
+
+            if (xpos_pile < XPOS_PILE_LEFT_LIMIT)
             {
-                sendMotorCommand(PIVOT_RIGHT, 70);
-                ros::spinOnce();
+		ROS_INFO("xpos: %f", xpos_pile); 
+		stop();
+                sendMotorCommand(PIVOT_LEFT, 65);
+		while (xpos_pile < XPOS_PILE_LEFT_LIMIT)
+		{
+			ROS_INFO("Pivoting left (xpos = %f)", xpos_pile);
+			ros::spinOnce();
+			loop_rate.sleep();
+		}
             }
             
-            while(xpos_pile > XPOS_PILE_RIGHT_LIMIT)
+	    else if (xpos_pile > XPOS_PILE_RIGHT_LIMIT)
             {
-                sendMotorCommand(PIVOT_LEFT, 70);
-                ros::spinOnce();
+		ROS_INFO("xpos: %f", xpos_pile); 
+ 		stop();
+                sendMotorCommand(PIVOT_RIGHT, 65);
+		while (xpos_pile > XPOS_PILE_RIGHT_LIMIT)
+		{
+			ROS_INFO("Pivoting left (xpos = %f)", xpos_pile);
+			ros::spinOnce();
+			loop_rate.sleep();
+		}
             }
-            sendMotorCommand(GO_FORWARD, 70);
+
+            sendMotorCommand(GO_FORWARD, 65);
             while (area_pile < AREA_PILE_CLOSE)
             { 
-                avoid_obstacle();
                 ros::spinOnce();
+		loop_rate.sleep();
             }
+	    ROS_INFO("Near pile");
             stop();
             sendServoCommand(DIG_BUCKET);
             while (FSR < FSR_THRESHOLD) { ros::spinOnce(); }
             sendServoCommand(LIFT_DIRT);
+	    return 0;
 
-        } else if (area_pile > AREA_PILE_LOW) {
-            (xpos_pile < XPOS_PILE_LEFT_LIMIT) ? sendMotorCommand(PIVOT_RIGHT, 70) : sendMotorCommand(PIVOT_LEFT, 70);
         } else { 
-            sendMotorCommand(PIVOT_LEFT, 70);
+	    ROS_INFO("No sight of pile");
+            sendMotorCommand(PIVOT_LEFT, 65);
         }
+	loop_rate.sleep();
         ros::spinOnce();
     }
 }
@@ -79,17 +100,17 @@ void avoid_obstacle()
     if (midIR > MID_VN)
     {
         ROS_WARN("Object in front");
-        sendMotorCommand(GO_BACKWARD, 70);
+        sendMotorCommand(GO_BACKWARD, 65);
         while(midIR > MID_FAR) { ros::spinOnce(); }
-        sendMotorCommand(PIVOT_RIGHT, 70);
+        sendMotorCommand(PIVOT_RIGHT, 65);
         while(midIR > MID_VF) { ros::spinOnce(); }
     } else if (leftIR > LEFT_VN) {
         ROS_WARN("Object to left");
-        sendMotorCommand(PIVOT_RIGHT, 70);
+        sendMotorCommand(PIVOT_RIGHT, 65);
         while (leftIR > LEFT_FAR) { ros::spinOnce(); }
     } else if (rightIR > RIGHT_VN) {
         ROS_WARN("Object to right");
-        sendMotorCommand(PIVOT_LEFT, 70);
+        sendMotorCommand(PIVOT_LEFT, 65);
         while (rightIR > RIGHT_FAR) { ros::spinOnce(); }
     }
 }
@@ -143,5 +164,11 @@ void xmegaFeedback(const std_msgs::UInt8::ConstPtr &msg)
 {
     wait = msg->data;
     ROS_INFO("wait value: %d", wait);
+}
+
+void processColor(const robot::color::ConstPtr &msg)
+{
+    xpos_pile = msg->xpos;
+    area_pile = msg->area;
 }
 
