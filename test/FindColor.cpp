@@ -6,8 +6,8 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
-#define HSV_MIN 153,97,134
-#define HSV_MAX 176,219,249
+#define HSV_MIN 153,97,211
+#define HSV_MAX 176,219,255
 
 int main(int argc, char** argv)
 {
@@ -43,9 +43,12 @@ int main(int argc, char** argv)
         float area = colorMoments.m00;
         float xCenter = xMoment/area;
 
+        cv::imshow("color", hsvFrame);
+
         robot::color msg;
         msg.xpos = xCenter;
         msg.area = area;
         colorPub.publish(msg);
+        cvWaitKey(1);
     }
 }

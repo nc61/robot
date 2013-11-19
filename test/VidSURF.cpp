@@ -6,6 +6,7 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/calib3d/calib3d.hpp"
+#include "robot/object.h"
 #include "ros/ros.h"
 #include <ctime>
 
@@ -13,11 +14,13 @@ using namespace cv;
 
 void readme();
 
-/** @function main */
+ros::Publisher objectRecPub;
+
 int main( int argc, char** argv )
 {
    ros::init(argc, argv, "VidSURF");
    ros::NodeHandle nh;
+   objectRecPub = nh.advertise<robot::object>("camera_data", 1);
 
     if( argc != 2 )
     { 
@@ -25,7 +28,7 @@ int main( int argc, char** argv )
         return -1; 
     }
 
-    int minHessian = 200;
+    int minHessian = 500;
     Mat frame;
     Mat img_scene;
     Mat img_object;
@@ -33,17 +36,19 @@ int main( int argc, char** argv )
     
     if(!img_object.data)
     { 
-        std::cout<< "Error reading object image" << std::endl; 
+        std::cout << "Error reading object image" << std::endl; 
         return -1; 
     }
     
-    VideoCapture capture(0);
+    VideoCapture capture(1);
     if (!capture.isOpened())
     {
         std::cout << "Error opening camera" << std::endl;
         return(-1);
     }
-        
+    capture.set(CV_CAP_PROP_FRAME_WIDTH, 320);
+    capture.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+       
     //Initialize a detector and an extractor
     SurfFeatureDetector detector(minHessian);
     SurfDescriptorExtractor extractor;
@@ -106,7 +111,7 @@ int main( int argc, char** argv )
 
             for( int i = 0; i < descriptors_object.rows; i++ )
             { 
-                if(matches[i].distance <= 2*min_dist) 
+                if(matches[i].distance <= .4*max_dist) 
                     {good_matches.push_back( matches[i]);}
             }
 
@@ -131,7 +136,7 @@ int main( int argc, char** argv )
                 perspectiveTransform(obj_corners, scene_corners, H);
 
                 //Publish the x coordinate of the center of the box;
-                
+     /*           
                 line( img_scene, scene_corners[0], 
                       scene_corners[1], Scalar(0, 255, 0), 4 );
                 line( img_scene, scene_corners[1], 
@@ -140,17 +145,25 @@ int main( int argc, char** argv )
                         scene_corners[3], Scalar( 0, 255, 0), 4 );
                 line( img_scene, scene_corners[3], 
                         scene_corners[0], Scalar( 0, 255, 0), 4 );
+        */
                 //-- Show detected matches
-                imshow("Object detection", img_scene); 
+               float xCenter = (scene_corners[0].x + scene_corners[2].x)/2;
+               float area = abs(scene_corners[0].x - scene_corners[2].x)*abs(scene_corners[0].y - scene_corners[3].y);
+
+               robot::object msg;
+               msg.xpos = xCenter;
+               msg.area = area;
+               objectRecPub.publish(msg);
+//               imshow("Object detection", img_scene); 
 
             } else {
-               imshow("Object detection", img_scene);
+ //              imshow("Object detection", img_scene);
             }
         } else {
-               imshow("Object detection", img_scene);
+  //             imshow("Object detection", img_scene);
         }
-        char ch =  waitKey(1);
-        if (ch == 27) break;
+   //     char ch =  waitKey(10);
+    //    if (ch == 27) break;
     }
     return 0;
 }
