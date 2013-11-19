@@ -3,6 +3,7 @@
 
 #include "robot/sensors.h"
 #include "robot/color.h"
+#include "robot/object.h"
 #include "std_msgs/UInt8.h"
 
 #define WANDER 0
@@ -27,6 +28,13 @@
 #define AREA_PILE_CLOSE 8000000
 #define PILE_IR_THRESH 175 
 
+#define XPOS_BIN_LEFT_LIMIT 140 
+#define XPOS_BIN_RIGHT_LIMIT 160
+#define AREA_BIN_THRESH 5000
+#define AREA_BIN_LOW 100
+#define AREA_BIN_CLOSE 80000
+#define BIN_IR_THRESH 175 
+
 
 void sendMotorCommand(uint8_t command, uint8_t duty_cycle);
 void sendServoCommand(uint8_t command);
@@ -35,5 +43,6 @@ void avoid_obstacle();
 void xmegaFeedback(const std_msgs::UInt8::ConstPtr &msg);
 void processSensors(const robot::sensors::ConstPtr &msg);
 void processColor(const robot::color::ConstPtr &msg);
+void processObject(const robot::object::ConstPtr &msg);
 
 #endif

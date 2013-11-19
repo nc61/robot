@@ -61,3 +61,6 @@ target_link_libraries(SURF ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 add_executable(NavToColor test/NavToColor.cpp)
 target_link_libraries(NavToColor ${catkin_LIBRARIES} ${OpenCV_LIBS})
+
+add_executable(NavToObject test/NavToObject.cpp)
+target_link_libraries(NavToObject ${catkin_LIBRARIES} ${OpenCV_LIBS})

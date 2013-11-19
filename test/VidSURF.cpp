@@ -20,7 +20,7 @@ int main( int argc, char** argv )
 {
    ros::init(argc, argv, "VidSURF");
    ros::NodeHandle nh;
-   objectRecPub = nh.advertise<robot::object>("camera_data", 1);
+   objectRecPub = nh.advertise<robot::object>("object_data", 1);
 
     if( argc != 2 )
     { 

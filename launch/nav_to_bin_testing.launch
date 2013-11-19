@@ -1,0 +1,7 @@
+<launch>
+    <node name="VidSURF" pkg="robot" type="VidSURF" />
+    <node name="NavToObject" pkg="robot" type="NavToObject" />
+    <node name="Maestro" pkg="robot" type="Maestro" />
+    <node name="Xmega" pkg="robot" type="Xmega" />
+
+</launch>
