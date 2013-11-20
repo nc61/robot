@@ -76,13 +76,13 @@ void motorCallback(const robot::motor::ConstPtr &msg)
     else if (command == PIVOT_RIGHT)
     {
   //      ROS_INFO("Pivoting right");
-        char cmd[] = {'p', 'r', duty_cycle};
+        char cmd[] = {'p', 'r', duty_cycle, 'n'};
         xmega.write(cmd, sizeof(cmd));
     }
     else if (command == PIVOT_LEFT)
     {
  //       ROS_INFO("Pivoting left");
-        char cmd[] = {'p', 'l', duty_cycle};
+        char cmd[] = {'p', 'l', duty_cycle, 'n'};
         xmega.write(cmd, sizeof(cmd));
     }
     else if (command == GO_BACKWARD)
@@ -95,6 +95,21 @@ void motorCallback(const robot::motor::ConstPtr &msg)
     {
         ROS_INFO("Stopping");
         char cmd[] = {'s', 'y'};
+        xmega.write(cmd, sizeof(cmd));
+    }
+    else if (command == STOP_IMMEDIATELY)
+    {
+        char cmd[] = {'i'};
+        xmega.write(cmd, sizeof(cmd));
+    }
+    else if (command == PIVOT_LEFT_IMM)
+    {
+        char cmd[] = {'p', 'l', duty_cycle, 'y'};
+        xmega.write(cmd, sizeof(cmd));
+    }
+    else if (command == PIVOT_RIGHT_IMM)
+    {
+        char cmd[] = {'p', 'r', duty_cycle, 'y'};
         xmega.write(cmd, sizeof(cmd));
     }
 }
