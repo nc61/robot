@@ -8,7 +8,7 @@
 #include "Common.h"
 
 //IR information and states
-uint8_t mode = WANDER;
+uint8_t state = WANDER;
 uint16_t rightIR;
 uint16_t midIR;
 uint16_t leftIR;
@@ -38,8 +38,8 @@ int main(int argc, char** argv)
 
     while(ros::ok())
     {
-        //In wander mode, robot moves forward with a duty cycle of 70
-        if (mode == WANDER)
+        //In wander state, robot moves forward with a duty cycle of 70
+        if (state == WANDER)
         {
             if ((midIR > MID_VN) || (leftIR > LEFT_VN) || (rightIR > RIGHT_VN))
             {

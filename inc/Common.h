@@ -1,6 +1,9 @@
 #ifndef COMMON_H
 #define COMMON_H
-
+#include "robot/color.h"
+#include "robot/object.h"
+#include "robot/motor.h"
+#include "robot/sensors.h"
 #define LOOP_RATE 10
 
 #define LIFT_DIRT    0
@@ -13,5 +16,13 @@
 #define DONE_LIFTING  0
 #define DONE_DUMPING  1
 #define DONE_LOWERING 2
+
+#define FIND_PILE 0
+#define NAV_TO_PILE 1
+#define APPROACH_PILE 2
+#define FIND_BIN 3
+#define NAV_TO_BIN 4
+#define APPROACH_BIN 5
+#define WANDER 6
 
 #endif

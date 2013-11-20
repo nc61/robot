@@ -29,11 +29,10 @@ target_link_libraries(Maestro ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
 add_executable(Xmega src/Xmega.cpp)
 target_link_libraries(Xmega ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
 
-add_executable(SenseReact src/SenseReact.cpp)
-target_link_libraries(SenseReact ${catkin_LIBRARIES})
 
-add_executable(RedDetect src/RedDetect.cpp)
-target_link_libraries(RedDetect ${catkin_LIBRARIES} ${OpenCV_LIBS})
+
+add_executable(Camera src/Camera.cpp)
+target_link_libraries(Camera ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 
 
@@ -53,8 +52,14 @@ target_link_libraries(CalibrateCam ${catkin_LIBRARIES} ${OpenCV_LIBS})
 #add_executable(TestMaestro test/TestMaestro.cpp)
 #target_link_libraries(TestMaestro ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
 
+#add_executable(RedDetect test/RedDetect.cpp)
+#target_link_libraries(RedDetect ${catkin_LIBRARIES} ${OpenCV_LIBS})
+
 add_executable(FindColor test/FindColor.cpp)
 target_link_libraries(FindColor ${catkin_LIBRARIES} ${OpenCV_LIBS})
+
+add_executable(SenseReact test/SenseReact.cpp)
+target_link_libraries(SenseReact ${catkin_LIBRARIES})
 
 add_executable(SURF test/SURF.cpp)
 target_link_libraries(SURF ${catkin_LIBRARIES} ${OpenCV_LIBS})

@@ -6,7 +6,6 @@
 #include "robot/object.h"
 #include "std_msgs/UInt8.h"
 
-#define WANDER 0
 #define MID_VN 250 
 #define LEFT_VN 250
 #define RIGHT_VN 250
