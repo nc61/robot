@@ -10,10 +10,6 @@
 #include "ros/ros.h"
 #include <ctime>
 
-using namespace cv;
-
-void readme();
-
 ros::Publisher objectRecPub;
 
 int main( int argc, char** argv )
@@ -22,17 +18,11 @@ int main( int argc, char** argv )
    ros::NodeHandle nh;
    objectRecPub = nh.advertise<robot::object>("object_data", 1);
 
-    if( argc != 2 )
-    { 
-        readme(); 
-        return -1; 
-    }
-
     int minHessian = 500;
     Mat frame;
     Mat img_scene;
     Mat img_object;
-    img_object = imread( argv[1], CV_LOAD_IMAGE_GRAYSCALE );
+    img_object = imread("/home/nick/img/dew.bmp", CV_LOAD_IMAGE_GRAYSCALE );
     
     if(!img_object.data)
     { 
@@ -169,5 +159,3 @@ int main( int argc, char** argv )
 }
 
   /** @function readme */
-  void readme()
-  { std::cout << " Usage: ./VidSURF <object_image>" << std::endl; }
