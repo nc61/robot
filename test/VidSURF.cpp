@@ -24,7 +24,7 @@ int main( int argc, char** argv )
     Mat frame;
     Mat img_scene;
     Mat img_object;
-    img_object = imread("/home/nick/img/dew.bmp", CV_LOAD_IMAGE_GRAYSCALE );
+    img_object = imread("/home/linaro/img/dew.bmp", CV_LOAD_IMAGE_GRAYSCALE );
     
     if(!img_object.data)
     { 
@@ -156,7 +156,6 @@ int main( int argc, char** argv )
             
             msg.xpos = xCenter;
             msg.area = area;
-            ROS_INFO("xpos0: %f\txpos1: %f\nxpos2: %f\txpos3 :%f\n");
             
             objectRecPub.publish(msg);
 		}
@@ -174,4 +173,3 @@ int main( int argc, char** argv )
     return 0;
 }
 
-  /** @function readme */

@@ -19,8 +19,7 @@ catkin_package(
 	CATKIN_DEPENDS message_runtime
 )
 
-
-include_directories(include ${catkin_INCLUDE_DIRS} /home/nick/catkin_ws/src/robot/inc/)
+include_directories(include ${catkin_INCLUDE_DIRS} /home/linaro/catkin_ws/src/robot/inc/)
 
 #Main programs
 add_executable(Maestro src/Maestro.cpp)

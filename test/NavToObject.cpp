@@ -42,27 +42,69 @@ int main(int argc, char** argv)
     while(ros::ok())
     {
 	ros::Rate delay_rate(100);
-	sendMotorCommand(PIVOT_LEFT_IMM, 65);
+	sendMotorCommand(PIVOT_LEFT_IMM, 75);
 	for (int i = 0; i < 5; i++) { delay_rate.sleep(); }
 	
         if (area_bin > AREA_BIN_THRESH && (xpos_bin > 125))
         {
             ROS_INFO("Area > AREA_BIN_THRESH (area = %f, xpos = %f)", area_bin, xpos_bin);
-            sendMotorCommand(GO_FORWARD, 65);
-            while (y_avg_bin < 125) { ros::spinOnce(); loop_rate.sleep(); }
+            while (y_avg_bin < 125) 
+	    {
+		ros::Rate delay_rate(1);
+            	sendMotorCommand(GO_FORWARD, 70);
+		delay_rate.sleep();
+		ROS_INFO("y_avg: %f", y_avg_bin); 
+		sendMotorCommand(STOP_IMMEDIATELY, 0);
+		delay_rate.sleep(); 
+		ros::spinOnce(); 
+	    }
             stop();
             if (y_3 > y_2)
             {
-                sendMotorCommand(PIVOT_RIGHT, 65);
-                while (xpos_bin > 0) { ros::spinOnce(); loop_rate.sleep(); }
-                sendMotorCommand(GO_FORWARD, 65);
-                while (leftIR < 350) { ros::spinOnce(); loop_rate.sleep(); }
+		ROS_INFO("y3 > y2");
+                while (xpos_bin > 40) { 
+			ros::Rate delay_rate(100);
+                	sendMotorCommand(PIVOT_RIGHT_IMM, 75);
+			for (int i = 0; i < 5; i++) delay_rate.sleep(); 
+			sendMotorCommand(STOP_IMMEDIATELY, 0);
+			ROS_INFO("x_pos: %f", xpos_bin); 
+			for (int i = 0; i < 40; i++) delay_rate.sleep(); 
+			ros::spinOnce(); 
+		}
+                	sendMotorCommand(GO_FORWARD, 75);
+                while (leftIR < 275) { ros::spinOnce(); loop_rate.sleep(); }
                 stop();
-            }
+		sendMotorCommand(PIVOT_LEFT, 75);
+		while (midIR < 315) { ros::spinOnce(); loop_rate.sleep(); }
+		stop();
+		return 0;
+            } else if (y_3 < y_2) {
+		ROS_INFO("y3 > y2");
+                while (xpos_bin < 260) { 
+			ros::Rate delay_rate(100);
+                	sendMotorCommand(PIVOT_LEFT_IMM, 75);
+			for (int i = 0; i < 5; i++) delay_rate.sleep(); 
+			sendMotorCommand(STOP_IMMEDIATELY, 0);
+			ROS_INFO("x_pos: %f", xpos_bin); 
+			for (int i = 0; i < 40; i++) delay_rate.sleep(); 
+			ros::spinOnce(); 
+		}
+                	sendMotorCommand(GO_FORWARD, 75);
+                while (rightIR < 275) { ros::spinOnce(); loop_rate.sleep(); }
+                stop();
+		sendMotorCommand(PIVOT_RIGHT, 75);
+		while (midIR < 315) { ros::spinOnce(); loop_rate.sleep(); }
+		stop();
+		return 0;
+
+	    }
+
+		ROS_INFO("y2 > y3");
+		return 0;
         } else { 
 	        ROS_INFO("No sight of pile");
 		sendMotorCommand(STOP_IMMEDIATELY, 0);
-		for (int i = 0; i < 10; i++) { delay_rate.sleep(); }
+		for (int i = 0; i < 40; i++) { delay_rate.sleep(); }
         }
         loop_rate.sleep();
         ros::spinOnce();
@@ -145,6 +187,10 @@ void xmegaFeedback(const std_msgs::UInt8::ConstPtr &msg)
 void processObject(const robot::object::ConstPtr &msg)
 {
     y_avg_bin = (msg->y2 + msg->y3)/2;
+    y_3 = msg->y3;
+    y_2 = msg->y2;
+    y_1 = msg->y1;
+    y_0 = msg->y0;
     xpos_bin = msg->xpos;
 	area_bin_prev = area_bin;
     area_bin = msg->area;
