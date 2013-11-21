@@ -49,62 +49,59 @@ int main(int argc, char** argv)
         {
             ROS_INFO("Area > AREA_BIN_THRESH (area = %f, xpos = %f)", area_bin, xpos_bin);
             while (y_avg_bin < 125) 
-	    {
-		ros::Rate delay_rate(1);
-            	sendMotorCommand(GO_FORWARD, 70);
-		delay_rate.sleep();
-		ROS_INFO("y_avg: %f", y_avg_bin); 
-		sendMotorCommand(STOP_IMMEDIATELY, 0);
-		delay_rate.sleep(); 
-		ros::spinOnce(); 
-	    }
-            stop();
-            if (y_3 > y_2)
             {
-		ROS_INFO("y3 > y2");
+                sendMotorCommand(GO_FORWARD_IMM, 70);
+                for (int i = 0; i < 20; i++) { loop_rate.sleep(); }
+                ROS_INFO("y_avg: %f", y_avg_bin); 
+                sendMotorCommand(STOP_IMMEDIATELY, 0);
+                for (int i = 0; i < 20; i++) { loop_rate.sleep(); }
+                ros::spinOnce(); 
+            }
+            stop();
+            if (y_3 - y_2 > 10)
+            {
+                ROS_INFO("y3 > y2");
                 while (xpos_bin > 40) { 
-			ros::Rate delay_rate(100);
-                	sendMotorCommand(PIVOT_RIGHT_IMM, 75);
-			for (int i = 0; i < 5; i++) delay_rate.sleep(); 
-			sendMotorCommand(STOP_IMMEDIATELY, 0);
-			ROS_INFO("x_pos: %f", xpos_bin); 
-			for (int i = 0; i < 40; i++) delay_rate.sleep(); 
-			ros::spinOnce(); 
-		}
-                	sendMotorCommand(GO_FORWARD, 75);
+                    ros::Rate delay_rate(100);
+                    sendMotorCommand(PIVOT_RIGHT_IMM, 75);
+                    for (int i = 0; i < 5; i++) delay_rate.sleep(); 
+                    sendMotorCommand(STOP_IMMEDIATELY, 0);
+                    ROS_INFO("x_pos: %f", xpos_bin); 
+                    for (int i = 0; i < 40; i++) delay_rate.sleep(); 
+                    ros::spinOnce(); 
+                }
+                sendMotorCommand(GO_FORWARD, 75);
                 while (leftIR < 275) { ros::spinOnce(); loop_rate.sleep(); }
                 stop();
-		sendMotorCommand(PIVOT_LEFT, 75);
-		while (midIR < 315) { ros::spinOnce(); loop_rate.sleep(); }
-		stop();
-		return 0;
-            } else if (y_3 < y_2) {
-		ROS_INFO("y3 > y2");
-                while (xpos_bin < 260) { 
-			ros::Rate delay_rate(100);
-                	sendMotorCommand(PIVOT_LEFT_IMM, 75);
-			for (int i = 0; i < 5; i++) delay_rate.sleep(); 
-			sendMotorCommand(STOP_IMMEDIATELY, 0);
-			ROS_INFO("x_pos: %f", xpos_bin); 
-			for (int i = 0; i < 40; i++) delay_rate.sleep(); 
-			ros::spinOnce(); 
-		}
-                	sendMotorCommand(GO_FORWARD, 75);
+                sendMotorCommand(PIVOT_LEFT, 75);
+                while (midIR < 315) { ros::spinOnce(); loop_rate.sleep(); }
+                stop();
+                return 0;
+            } else if (y_2 - y_3 > 10) {
+                ROS_INFO("y3 > y2");
+                while (xpos_bin < 260) 
+                { 
+                    ros::Rate delay_rate(100);
+                    sendMotorCommand(PIVOT_LEFT_IMM, 75);
+                    for (int i = 0; i < 5; i++) delay_rate.sleep(); 
+                    sendMotorCommand(STOP_IMMEDIATELY, 0);
+                    ROS_INFO("x_pos: %f", xpos_bin); 
+                    for (int i = 0; i < 40; i++) delay_rate.sleep(); 
+                    ros::spinOnce(); 
+                }
+                sendMotorCommand(GO_FORWARD, 75);
                 while (rightIR < 275) { ros::spinOnce(); loop_rate.sleep(); }
                 stop();
-		sendMotorCommand(PIVOT_RIGHT, 75);
-		while (midIR < 315) { ros::spinOnce(); loop_rate.sleep(); }
-		stop();
-		return 0;
+                sendMotorCommand(PIVOT_RIGHT, 75);
+                while (midIR < 315) { ros::spinOnce(); loop_rate.sleep(); }
+                stop();
+                return 0;
+            }
 
-	    }
-
-		ROS_INFO("y2 > y3");
-		return 0;
         } else { 
 	        ROS_INFO("No sight of pile");
-		sendMotorCommand(STOP_IMMEDIATELY, 0);
-		for (int i = 0; i < 40; i++) { delay_rate.sleep(); }
+            sendMotorCommand(STOP_IMMEDIATELY, 0);
+            for (int i = 0; i < 40; i++) { delay_rate.sleep(); }
         }
         loop_rate.sleep();
         ros::spinOnce();
