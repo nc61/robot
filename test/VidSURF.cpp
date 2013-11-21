@@ -10,6 +10,11 @@
 #include "ros/ros.h"
 #include <ctime>
 
+<<<<<<< HEAD
+=======
+using namespace cv;
+
+>>>>>>> 306a86644fa1bf149b67397b0f210a938c5503a3
 ros::Publisher objectRecPub;
 
 int main( int argc, char** argv )
@@ -22,7 +27,11 @@ int main( int argc, char** argv )
     Mat frame;
     Mat img_scene;
     Mat img_object;
+<<<<<<< HEAD
     img_object = imread("/home/nick/img/dew.bmp", CV_LOAD_IMAGE_GRAYSCALE );
+=======
+    img_object = imread("/home/linaro/img/dew.bmp", CV_LOAD_IMAGE_GRAYSCALE );
+>>>>>>> 306a86644fa1bf149b67397b0f210a938c5503a3
     
     if(!img_object.data)
     { 
@@ -60,7 +69,7 @@ int main( int argc, char** argv )
     obj_corners[2] = cvPoint(img_object.cols, img_object.rows); 
     obj_corners[3] = cvPoint(0, img_object.rows);
 
-    while(1){
+    while(ros::ok()){
 
         //Capture frame, then extract key points and descriptors
         capture >> frame;
@@ -85,7 +94,6 @@ int main( int argc, char** argv )
             std::vector<DMatch> matches;
             matcher.match(descriptors_object, descriptors_scene, matches);
             
-            std::cout << "time: " << time(NULL)  << std::endl;
             //Calculate minimum and maximum distances    
             double max_dist = 0; 
             double min_dist = 100;
@@ -140,10 +148,13 @@ int main( int argc, char** argv )
                float xCenter = (scene_corners[0].x + scene_corners[2].x)/2;
                float area = abs(scene_corners[0].x - scene_corners[2].x)*abs(scene_corners[0].y - scene_corners[3].y);
 
-               robot::object msg;
-               msg.xpos = xCenter;
-               msg.area = area;
-               objectRecPub.publish(msg);
+	       if ((scene_corners[0].x < scene_corners[2].x) && (scene_corners[1].y < scene_corners[3].y))
+		{
+		       robot::object msg;
+		       msg.xpos = xCenter;
+		       msg.area = area;
+		       objectRecPub.publish(msg);
+		}
 //               imshow("Object detection", img_scene); 
 
             } else {
@@ -157,5 +168,8 @@ int main( int argc, char** argv )
     }
     return 0;
 }
+<<<<<<< HEAD
 
   /** @function readme */
+=======
+>>>>>>> 306a86644fa1bf149b67397b0f210a938c5503a3
