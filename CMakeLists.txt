@@ -20,7 +20,7 @@ catkin_package(
 )
 
 
-include_directories(include ${catkin_INCLUDE_DIRS} /home/linaro/catkin_ws/src/robot/inc/)
+include_directories(include ${catkin_INCLUDE_DIRS} /home/nick/catkin_ws/src/robot/inc/)
 
 #Main programs
 add_executable(Maestro src/Maestro.cpp)
@@ -55,8 +55,8 @@ target_link_libraries(CalibrateCam ${catkin_LIBRARIES} ${OpenCV_LIBS})
 #add_executable(RedDetect test/RedDetect.cpp)
 #target_link_libraries(RedDetect ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
-add_executable(FindColor test/FindColor.cpp)
-target_link_libraries(FindColor ${catkin_LIBRARIES} ${OpenCV_LIBS})
+#add_executable(FindColor test/FindColor.cpp)
+#target_link_libraries(FindColor ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 add_executable(SenseReact test/SenseReact.cpp)
 target_link_libraries(SenseReact ${catkin_LIBRARIES})

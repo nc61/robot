@@ -10,11 +10,8 @@
 #include "ros/ros.h"
 #include <ctime>
 
-<<<<<<< HEAD
-=======
 using namespace cv;
 
->>>>>>> 306a86644fa1bf149b67397b0f210a938c5503a3
 ros::Publisher objectRecPub;
 
 int main( int argc, char** argv )
@@ -27,11 +24,7 @@ int main( int argc, char** argv )
     Mat frame;
     Mat img_scene;
     Mat img_object;
-<<<<<<< HEAD
     img_object = imread("/home/nick/img/dew.bmp", CV_LOAD_IMAGE_GRAYSCALE );
-=======
-    img_object = imread("/home/linaro/img/dew.bmp", CV_LOAD_IMAGE_GRAYSCALE );
->>>>>>> 306a86644fa1bf149b67397b0f210a938c5503a3
     
     if(!img_object.data)
     { 
@@ -148,12 +141,24 @@ int main( int argc, char** argv )
                float xCenter = (scene_corners[0].x + scene_corners[2].x)/2;
                float area = abs(scene_corners[0].x - scene_corners[2].x)*abs(scene_corners[0].y - scene_corners[3].y);
 
-	       if ((scene_corners[0].x < scene_corners[2].x) && (scene_corners[1].y < scene_corners[3].y))
+	    if ((scene_corners[0].x < scene_corners[2].x) && (scene_corners[1].y < scene_corners[3].y))
 		{
-		       robot::object msg;
-		       msg.xpos = xCenter;
-		       msg.area = area;
-		       objectRecPub.publish(msg);
+            robot::object msg;
+            msg.x0 = scene_corners[0].x;
+            msg.x1 = scene_corners[1].x;
+            msg.x2 = scene_corners[2].x;
+            msg.x3 = scene_corners[3].x;
+            
+            msg.y0 = scene_corners[0].y;
+            msg.y1 = scene_corners[1].y;
+            msg.y2 = scene_corners[2].y;
+            msg.y3 = scene_corners[3].y;
+            
+            msg.xpos = xCenter;
+            msg.area = area;
+            ROS_INFO("xpos0: %f\txpos1: %f\nxpos2: %f\txpos3 :%f\n");
+            
+            objectRecPub.publish(msg);
 		}
 //               imshow("Object detection", img_scene); 
 
@@ -168,8 +173,5 @@ int main( int argc, char** argv )
     }
     return 0;
 }
-<<<<<<< HEAD
 
   /** @function readme */
-=======
->>>>>>> 306a86644fa1bf149b67397b0f210a938c5503a3
