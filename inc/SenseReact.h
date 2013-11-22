@@ -28,6 +28,7 @@
 
 #define XPOS_PILE_LEFT_LIMIT 285 
 #define XPOS_PILE_RIGHT_LIMIT 315
+#define PILE_CENTERED 300
 #define AREA_PILE_THRESH 600000
 #define AREA_PILE_LOW 100000
 #define AREA_PILE_CLOSE 8000000
@@ -39,15 +40,5 @@
 #define AREA_BIN_LOW 100
 #define AREA_BIN_CLOSE 25000
 #define BIN_IR_THRESH 175 
-
-
-void sendMotorCommand(uint8_t command, uint8_t duty_cycle);
-void sendServoCommand(uint8_t command);
-void stop();
-void avoid_obstacle();
-void xmegaFeedback(const std_msgs::UInt8::ConstPtr &msg);
-void processSensors(const robot::sensors::ConstPtr &msg);
-void processColor(const robot::color::ConstPtr &msg);
-void processObject(const robot::object::ConstPtr &msg);
 
 #endif

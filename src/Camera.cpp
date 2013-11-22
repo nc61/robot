@@ -13,7 +13,7 @@
 
 ros::Publisher objectRecPub;
 ros::Publisher colorPub;
-uint8_t state = -1;
+uint8_t state = FIND_BIN;
 
 int main( int argc, char** argv )
 {
@@ -26,7 +26,6 @@ int main( int argc, char** argv )
    
     //Subscriber
     ros::Subscriber stateSub = nh.subscribe<std_msgs::UInt8>("state_data", 1, processState);
-
 
     cv::Mat frame;
     cv::Mat img_scene, img_object;
@@ -102,7 +101,7 @@ int main( int argc, char** argv )
                 std::vector<cv::DMatch> matches;
                 matcher.match(descriptors_object, descriptors_scene, matches);
                 
-                ROS_INFO("time: %ld", time(NULL));
+//                ROS_INFO("time: %ld", time(NULL));
                 //Calculate minimum and maximum distances    
                 double max_dist = 0; 
                 double min_dist = 100;
@@ -151,16 +150,26 @@ int main( int argc, char** argv )
                             scene_corners[0], Scalar( 0, 255, 0), 4 );
             */
                    
-                   float xCenter = (scene_corners[0].x + scene_corners[2].x)/2;
-                   float area = abs(scene_corners[0].x - scene_corners[2].x)*abs(scene_corners[0].y - scene_corners[3].y);
+                    float xCenter = (scene_corners[0].x + scene_corners[2].x)/2;
+                    float area = abs(scene_corners[0].x - scene_corners[2].x)*abs(scene_corners[0].y - scene_corners[3].y);
 
-                    
-                   robot::object msg;
-                   msg.xpos = xCenter;
-                   msg.area = area;
-                   objectRecPub.publish(msg);
-//                   cv::imshow("object", img_scene);
-//                   cvWaitKey(1);
+
+                    robot::object msg;
+                    msg.x0 = scene_corners[0].x;
+                    msg.x1 = scene_corners[1].x;
+                    msg.x2 = scene_corners[2].x;
+                    msg.x3 = scene_corners[3].x;
+
+                    msg.y0 = scene_corners[0].y;
+                    msg.y1 = scene_corners[1].y;
+                    msg.y2 = scene_corners[2].y;
+                    msg.y3 = scene_corners[3].y;
+
+                    msg.xpos = xCenter;
+                    msg.area = area;
+                    objectRecPub.publish(msg);
+                    //                   cv::imshow("object", img_scene);
+                    //                   cvWaitKey(1);
                 }
             }
         } else if (state == FIND_PILE || state == NAV_TO_PILE) {
@@ -183,6 +192,7 @@ int main( int argc, char** argv )
     //        cv::imshow("color", hsvFrame);
      //       cvWaitKey(1);
         }
+        ros::spinOnce();
     }
     return 0;
 }

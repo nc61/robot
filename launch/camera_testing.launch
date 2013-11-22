@@ -1,3 +1,3 @@
 <launch>
-    <node name="VidSURF" pkg="robot" type="VidSURF" />
+    <node name="Camera" pkg="robot" type="Camera" />
 </launch>

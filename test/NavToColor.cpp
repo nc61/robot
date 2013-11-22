@@ -7,6 +7,7 @@
 #include "std_msgs/Char.h"
 #include "SenseReact.h"
 #include "Common.h"
+#include "Demo.h"
 
 //IR information and states
 uint16_t rightIR;

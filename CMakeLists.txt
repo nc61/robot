@@ -28,7 +28,8 @@ target_link_libraries(Maestro ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
 add_executable(Xmega src/Xmega.cpp)
 target_link_libraries(Xmega ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
 
-
+add_executable(Demo src/Demo.cpp)
+target_link_libraries(Demo ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
 
 add_executable(Camera src/Camera.cpp)
 target_link_libraries(Camera ${catkin_LIBRARIES} ${OpenCV_LIBS})
