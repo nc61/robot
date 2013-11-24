@@ -4,7 +4,7 @@
 #include "robot/object.h"
 #include "robot/motor.h"
 #include "robot/sensors.h"
-#define LOOP_RATE 10
+#define LOOP_RATE 20 
 #define INIT_DELAY 1
 
 #define LIFT_DIRT    0

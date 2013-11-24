@@ -1,0 +1,7 @@
+<launch>
+    <node name="Camera" pkg="robot" type="Camera" />
+    <node name="Demo" pkg="robot" type="Demo" />
+    <node name="Maestro" pkg="robot" type="Maestro" />
+    <node name="Xmega" pkg="robot" type="Xmega" />
+
+</launch>

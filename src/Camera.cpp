@@ -197,8 +197,6 @@ int main( int argc, char** argv )
             msg.area = area;
             colorPub.publish(msg);
 
-            cv::imshow("window", hsvFrame);
-            cvWaitKey(1);
             ROS_INFO("xpos: %f\tarea: %f\n", xCenter, area);
         }
     }

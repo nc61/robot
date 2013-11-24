@@ -40,11 +40,11 @@ target_link_libraries(Camera ${catkin_LIBRARIES} ${OpenCV_LIBS})
 #add_executable(SimpleServo test/SimpleServo.cpp)
 #target_link_libraries(SimpleServo ${catkin_LIBRARIES} /usr/local/lib/libserial.so)
 
-add_executable(VidSURF test/VidSURF.cpp)
-target_link_libraries(VidSURF ${catkin_LIBRARIES} ${OpenCV_LIBS})
+#add_executable(VidSURF test/VidSURF.cpp)
+#target_link_libraries(VidSURF ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
-add_executable(CalibrateCam test/CalibrateCam.cpp)
-target_link_libraries(CalibrateCam ${catkin_LIBRARIES} ${OpenCV_LIBS})
+#add_executable(CalibrateCam test/CalibrateCam.cpp)
+#target_link_libraries(CalibrateCam ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 #add_executable(XmegaTest test/XmegaTest.cpp)
 #target_link_libraries(XmegaTest ${catkin_LIBRARIES})
@@ -58,14 +58,14 @@ target_link_libraries(CalibrateCam ${catkin_LIBRARIES} ${OpenCV_LIBS})
 #add_executable(FindColor test/FindColor.cpp)
 #target_link_libraries(FindColor ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
-add_executable(SenseReact test/SenseReact.cpp)
-target_link_libraries(SenseReact ${catkin_LIBRARIES})
+#add_executable(SenseReact test/SenseReact.cpp)
+#target_link_libraries(SenseReact ${catkin_LIBRARIES})
 
-add_executable(SURF test/SURF.cpp)
-target_link_libraries(SURF ${catkin_LIBRARIES} ${OpenCV_LIBS})
+#add_executable(SURF test/SURF.cpp)
+#target_link_libraries(SURF ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
-add_executable(NavToColor test/NavToColor.cpp)
-target_link_libraries(NavToColor ${catkin_LIBRARIES} ${OpenCV_LIBS})
+#add_executable(NavToColor test/NavToColor.cpp)
+#target_link_libraries(NavToColor ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
-add_executable(NavToObject test/NavToObject.cpp)
-target_link_libraries(NavToObject ${catkin_LIBRARIES} ${OpenCV_LIBS})
+#add_executable(NavToObject test/NavToObject.cpp)
+#target_link_libraries(NavToObject ${catkin_LIBRARIES} ${OpenCV_LIBS})
