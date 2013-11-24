@@ -28,13 +28,15 @@ int main(int argc, char** argv)
 
     ros::init(argc, argv, "Xmega");
     ros::NodeHandle nh;
-    ros::Rate loop_rate(10);
+    ros::Rate loop_rate(LOOP_RATE);
+    ros::Rate init_delay(INIT_DELAY);
 
     //Publishers
     ros::Publisher xmegaFeedback = nh.advertise<std_msgs::UInt8>("xmega_feedback", 1000);
-    loop_rate.sleep();
+    init_delay.sleep();
     //Subscribers
     ros::Subscriber motorCommand = nh.subscribe<robot::motor>("motor_command", 1000, motorCallback);
+    init_delay.sleep();
     
     while(ros::ok()){
         ros::spinOnce();

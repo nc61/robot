@@ -6,17 +6,29 @@
 #include "robot/object.h"
 #include "std_msgs/UInt8.h"
 
+#define NORMAL_SPEED 65
+#define FAST 70
+#define SLOW_PIVOT_TO_PILE 63
+#define IR_BIN_RIGHT 325
+#define IR_BIN_LEFT 325
+#define IR_BIN_MID 355
+#define IR_BIN_DUMP 390
+
 void sendMotorCommand(uint8_t command, uint8_t duty_cycle);
 void sendServoCommand(uint8_t command);
 void stop();
-void avoid_obstacle();
+int avoid_obstacle();
 void xmegaFeedback(const std_msgs::UInt8::ConstPtr &msg);
 void processSensors(const robot::sensors::ConstPtr &msg);
 void processColor(const robot::color::ConstPtr &msg);
 void processObject(const robot::object::ConstPtr &msg);
-void delayms(uint16_t ms);
+void delayms(uint16_t ms, uint8_t avoid);
+void delayms(uint16_t msg);
+void findPile();
+void navToPile();
 void navToBin();
-void findBin(uint8_t dir);
+void findBin();
+void smallMovement(uint8_t direction, uint16_t interval, uint8_t avoid);
 
 
 #endif

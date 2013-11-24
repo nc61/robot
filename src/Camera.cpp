@@ -19,19 +19,22 @@ int main( int argc, char** argv )
 {
     ros::init(argc, argv, "Camera");
     ros::NodeHandle nh;
+    ros::Rate loop_rate(LOOP_RATE);
+    ros::Rate init_delay(INIT_DELAY);
     
     //Publisher
     objectRecPub = nh.advertise<robot::object>("object_data", 1);
     colorPub = nh.advertise<robot::color>("color_data", 1);
-   
+    init_delay.sleep();
     //Subscriber
     ros::Subscriber stateSub = nh.subscribe<std_msgs::UInt8>("state_data", 1, processState);
+    init_delay.sleep();
 
     cv::Mat frame;
     cv::Mat img_scene, img_object;
     cv::Mat hsvFrame, bgrFrame;
     
-    img_object = cv::imread("/home/nick/img/dew.bmp", CV_LOAD_IMAGE_GRAYSCALE );
+    img_object = cv::imread("/home/linaro/img/dew.bmp", CV_LOAD_IMAGE_GRAYSCALE );
     
     if(!img_object.data)
     { 
@@ -74,8 +77,9 @@ int main( int argc, char** argv )
     capture.set(CV_CAP_PROP_FRAME_WIDTH, 320);
     capture.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
     
+    ros::spinOnce();
     while(ros::ok()){
-        
+        ros::spinOnce();
         if (state == FIND_BIN || state == NAV_TO_BIN)
         {
             //Capture frame, then extract key points and descriptors
@@ -167,9 +171,12 @@ int main( int argc, char** argv )
 
                     msg.xpos = xCenter;
                     msg.area = area;
+                    if ( (msg.x1 > 0 ) && (msg.x2 > 0) && (msg.y2 > 0 ) && (msg.y3 > 0) && (area < 50000) 
+                        && (msg.y2 > msg.y1) && (msg.y3 > msg.y0) && (msg.x1 > msg.x0) && (msg.x2 > msg.x3)
+                        && ((msg.y2 - msg.y1)/(msg.y3 - msg.y0) < 2)
+                        && ((msg.y2 - msg.y1)/(msg.y3 - msg.y0) > 1/2) )
                     objectRecPub.publish(msg);
-                    //                   cv::imshow("object", img_scene);
-                    //                   cvWaitKey(1);
+                    ROS_INFO("area: %f", area);
                 }
             }
         } else if (state == FIND_PILE || state == NAV_TO_PILE) {
@@ -189,10 +196,9 @@ int main( int argc, char** argv )
             msg.xpos = xCenter;
             msg.area = area;
             colorPub.publish(msg);
-    //        cv::imshow("color", hsvFrame);
-     //       cvWaitKey(1);
+
+            ROS_INFO("xpos: %f\tarea: %f\n", xCenter, area);
         }
-        ros::spinOnce();
     }
     return 0;
 }
@@ -200,5 +206,6 @@ int main( int argc, char** argv )
 void processState(const std_msgs::UInt8::ConstPtr &msg)
 {
     state = msg->data;
+    ROS_INFO("Updated state to %d", state);
 }
 

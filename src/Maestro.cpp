@@ -40,17 +40,20 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "Maestro");
     ros::NodeHandle nh;
     ros::Rate loop_rate(LOOP_RATE);
+    ros::Rate init_delay(INIT_DELAY);
     //Publisher
     sensorPub = nh.advertise<robot::sensors>("sensor_data", 1);
     maestroFeedback = nh.advertise<std_msgs::UInt8>("maestro_feedback", 1);
-    loop_rate.sleep(); 
+    init_delay.sleep();
     //Subscriber
-    ros::Subscriber servoControl = nh.subscribe<std_msgs::UInt8>("servo_command", 1, servoCallback);
+    ros::Subscriber servoControl = nh.subscribe<std_msgs::UInt8>("maestro_command", 1, servoCallback);
+    init_delay.sleep();
     
     //Initialize servos
     servoInit();
     while(ros::ok())
     {
+        ros::spinOnce();
         robot::sensors msg;
         msg.leftIR = readPin(SENSOR_IR_L_PIN); 
         msg.midIR = readPin(SENSOR_IR_M_PIN);
@@ -58,9 +61,8 @@ int main(int argc, char** argv)
         msg.FSR = readPin(SENSOR_FSR_PIN);
         
 //        ROS_INFO("Left: %d\tMid: %d\tRight: %d", msg.leftIR, msg.midIR, msg.rightIR);
-//        ROS_INFO("FSR: %d/n", msg.FSR);
+//        ROS_INFO("FSR: %d\n", msg.FSR);
         sensorPub.publish(msg);
-        ros::spinOnce();
         loop_rate.sleep();
     }
     servoInit();
@@ -202,6 +204,7 @@ void servoInit()
     getError(4);
     wait_until_position(SERVO_BUCKET_PIN, SERVO_BUCKET_BASE_POS);
     wait_until_position(SERVO_ARM_PIN, SERVO_ARM_BASE_POS);
+    ROS_INFO("Servos initialized");
 }
 
 void wait_until_position(uint8_t channel, uint16_t target)
@@ -212,7 +215,7 @@ void wait_until_position(uint8_t channel, uint16_t target)
     ros::Rate loop_rate(LOOP_RATE);
     ROS_INFO("target: %d\tchannel: %d\n", target, channel);
     
-    while(abs(pulse_time - target) > 5)
+    while((abs(pulse_time - target) > 5) && (ros::ok()))
     {
         maestro.write(cmd, sizeof(cmd));
         maestro.read(response, sizeof(response));

@@ -56,7 +56,7 @@ int main(int argc, char** argv)
 
 //Description: avoids an obstacle
 //Calls: stop(), sendMotorCommand(), avoid_obstacle()
-void avoid_obstacle()
+int avoid_obstacle()
 {
     if (midIR > MID_VN)
     {
