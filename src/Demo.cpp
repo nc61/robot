@@ -49,6 +49,7 @@ int main(int argc, char** argv)
         std_msgs::UInt8 msg;
         msg.data = state;
         statePub.publish(msg);
+        ros::spinOnce();
 
         if (state == FIND_PILE)
         {
@@ -67,11 +68,11 @@ int main(int argc, char** argv)
             while (FSR < FSR_THRESHOLD){ ros::spinOnce(); loop_rate.sleep(); }
             sendMotorCommand(STOP_IMMEDIATELY, 0);
             sendServoCommand(TILT_BACK_BUCKET);
-            delayms(2000);
+            delayms(1500);
             sendServoCommand(LIFT_DIRT);
-            delayms(2000);
+            delayms(1500);
             sendMotorCommand(GO_BACKWARD, NORMAL_SPEED);
-            delayms(3000);
+            delayms(2000);
             stop();
             state = FIND_BIN;
         } else if (state == FIND_BIN) {
@@ -81,12 +82,12 @@ int main(int argc, char** argv)
         } else if (state == NAV_TO_BIN) {
             ROS_INFO("Navigating to bin");
             navToBin();
-            delayms(3000);
+            delayms(1500);
             sendServoCommand(DUMP_DIRT);
-            delayms(3000);
+            delayms(1500);
             smallMovement(BACKWARD, 1000, NO_AVOID);
             sendServoCommand(SERVO_INIT);
-            smallMovement(LEFT, 1000, NO_AVOID);
+            smallMovement(!last_turn, 2000, NO_AVOID);
             state = FIND_PILE;
         }
 
@@ -95,6 +96,7 @@ int main(int argc, char** argv)
 }
 void navToPile()
 {
+    ros::Rate loop_rate(LOOP_RATE/5);
     sendMotorCommand(GO_FORWARD, NORMAL_SPEED);
     while (area_pile < AREA_PILE_CLOSE && ros::ok())
     {
@@ -107,7 +109,7 @@ void navToPile()
             sendMotorCommand(GO_FORWARD, NORMAL_SPEED);
         }
         ROS_INFO("Heading toward pile");
-        delayms(75);
+        loop_rate.sleep();
     }
 }
 
@@ -123,7 +125,7 @@ void findPile()
                 //"almost" centered
                 if (xpos_pile > XPOS_PILE_LEFT_LIMIT)
                 {
-                    ROS_INFO("Pile close to aligned");
+                    ROS_INFO("Pile close to aligned left");
                     sendMotorCommand(PIVOT_LEFT, SLOW_PIVOT_TO_PILE);
                     while (xpos_pile < (XPOS_PILE_CENTERED) || area_pile < AREA_PILE_THRESH) { ros::spinOnce(); }
                     sendMotorCommand(STOP_IMMEDIATELY, 0);
@@ -137,8 +139,8 @@ void findPile()
                 //"almost" centered
                 if (xpos_pile < XPOS_PILE_RIGHT_LIMIT)
                 {
-                    ROS_INFO("Pile close to aligned");
-                    sendMotorCommand(PIVOT_LEFT, SLOW_PIVOT_TO_PILE);
+                    ROS_INFO("Pile close to aligned right");
+                    sendMotorCommand(PIVOT_RIGHT, SLOW_PIVOT_TO_PILE);
                     while (xpos_pile > (XPOS_PILE_CENTERED) || area_pile < AREA_PILE_THRESH) { ros::spinOnce(); }
                     sendMotorCommand(STOP_IMMEDIATELY, 0);
                     state = NAV_TO_PILE;
@@ -153,10 +155,10 @@ void findPile()
                 return;
             }
         } else if (last_turn == RIGHT) {
-            sendMotorCommand(PIVOT_LEFT, FAST);
+            sendMotorCommand(PIVOT_LEFT, NORMAL_SPEED);
             ROS_INFO("No sight of pile. pivoting left.");
         } else if (last_turn == LEFT) {
-            sendMotorCommand(PIVOT_RIGHT, FAST);
+            sendMotorCommand(PIVOT_RIGHT, NORMAL_SPEED);
             ROS_INFO("No sight of pile. Pivoting right.");
         }
 
@@ -188,7 +190,7 @@ void navToBin()
         {
             ROS_INFO("y3 > y2");
             while (xpos_bin > XPOS_BIN_ALIGN_RIGHT) { 
-                smallMovement(RIGHT, 200, NO_AVOID);
+                smallMovement(RIGHT, FAST, 150, NO_AVOID);
                 for (int i = 0; i < NTB_FWD_CYCLES; i++)
                 {
                     ros::spinOnce();
@@ -209,7 +211,7 @@ void navToBin()
         } else if (y_2 - y_3 > ORIENTATION_THRESHOLD) {
             ROS_INFO("y2 > y3");
             while (xpos_bin < XPOS_BIN_ALIGN_LEFT) { 
-                smallMovement(LEFT, 200, NO_AVOID);
+                smallMovement(LEFT, FAST, 150, NO_AVOID);
                 for (int i = 0; i < NTB_FWD_CYCLES; i++)
                 {
                     ros::spinOnce();
@@ -250,7 +252,7 @@ void findBin()
             if (xpos_bin < XPOS_BIN_LEFT_LIMIT)
             {
                 ROS_INFO("Bin found to left");
-                smallMovement(LEFT, 75, NO_AVOID);
+                smallMovement(LEFT, FAST, 150, NO_AVOID);
                 for (int i = 0; i < 5; i++)
                 {
                     ros::spinOnce();
@@ -263,7 +265,7 @@ void findBin()
                 }
             } else if (xpos_bin > XPOS_BIN_RIGHT_LIMIT) {
                 ROS_INFO("Bin found to right");
-                smallMovement(RIGHT, 75, NO_AVOID);
+                smallMovement(RIGHT, FAST, 150, NO_AVOID);
                 for (int i = 0; i < 5; i++)
                 {
                     ros::spinOnce();
@@ -276,8 +278,8 @@ void findBin()
                 }
             }
         } else if (last_turn == LEFT) {
-            ROS_INFO("Pivoting right toward bin");
-            smallMovement(RIGHT, 750, NO_AVOID);
+            ROS_INFO("No sight of bin. Pivoting left");
+            smallMovement(RIGHT, FAST, 500, NO_AVOID);
             for (int i = 0; i < 5; i++)
             {
                 ros::spinOnce();
@@ -286,8 +288,8 @@ void findBin()
                 loop_rate.sleep();
             }
         } else {
-            ROS_INFO("Pivoting right toward bin");
-            smallMovement(LEFT, 750, NO_AVOID);
+            ROS_INFO("No sight of bin. Pivoting left"); 
+            smallMovement(LEFT, FAST, 500, NO_AVOID);
             for (int i = 0; i < 5; i++) 
             {
                 ros::spinOnce();
@@ -322,7 +324,7 @@ int avoid_obstacle()
         while (midIR > MID_VF){ ros::spinOnce(); }
         if (state == NAV_TO_PILE || state == NAV_TO_BIN)
         {
-            smallMovement(FORWARD, 750, AVOID);
+            smallMovement(FORWARD, FAST, 750, AVOID);
             if (state == NAV_TO_BIN) {
                 state = FIND_BIN;
             } else {
@@ -337,7 +339,7 @@ int avoid_obstacle()
         last_turn = RIGHT;
         if (state == NAV_TO_PILE || state == NAV_TO_BIN)
         {
-            smallMovement(FORWARD, 750, AVOID);
+            smallMovement(FORWARD, FAST, 750, AVOID);
             if (state == NAV_TO_BIN) {
                 state = FIND_BIN;
             } else {
@@ -352,7 +354,7 @@ int avoid_obstacle()
         last_turn = LEFT;
         if (state == NAV_TO_PILE || state == NAV_TO_BIN)
         {
-            smallMovement(FORWARD, 750, AVOID);
+            smallMovement(FORWARD, FAST, 750, AVOID);
             if (state == NAV_TO_BIN) {
                 ROS_INFO("Back to looking for bin");
                 state = FIND_BIN;
@@ -394,6 +396,20 @@ void smallMovement(uint8_t direction, uint16_t interval, uint8_t avoid)
     sendMotorCommand(STOP_IMMEDIATELY, 0);
 }
 
+void smallMovement(uint8_t direction, uint8_t duty_cycle, uint16_t interval, uint8_t avoid)
+{
+    if (direction == LEFT)
+        sendMotorCommand(PIVOT_LEFT_IMM, duty_cycle);
+    else if (direction == RIGHT)
+        sendMotorCommand(PIVOT_RIGHT_IMM, duty_cycle);
+    else if (direction == FORWARD)
+        sendMotorCommand(GO_FORWARD_IMM, duty_cycle);
+    else if (direction == BACKWARD)
+        sendMotorCommand(GO_BACKWARD, duty_cycle);
+    else ROS_FATAL("Invalid argument to smallMovement");
+    delayms(interval, avoid);
+    sendMotorCommand(STOP_IMMEDIATELY, 0);
+}
 //Description: Sends a command to the motor controller
 void sendMotorCommand(uint8_t command, uint8_t duty_cycle)
 {

@@ -13,7 +13,7 @@
 
 ros::Publisher objectRecPub;
 ros::Publisher colorPub;
-uint8_t state = FIND_BIN;
+uint8_t state = FIND_PILE;
 
 int main( int argc, char** argv )
 {
@@ -34,7 +34,7 @@ int main( int argc, char** argv )
     cv::Mat img_scene, img_object;
     cv::Mat hsvFrame, bgrFrame;
     
-    img_object = cv::imread("/home/linaro/img/dew.bmp", CV_LOAD_IMAGE_GRAYSCALE );
+    img_object = cv::imread("/home/nick/img/dew.bmp", CV_LOAD_IMAGE_GRAYSCALE );
     
     if(!img_object.data)
     { 
@@ -197,6 +197,8 @@ int main( int argc, char** argv )
             msg.area = area;
             colorPub.publish(msg);
 
+            cv::imshow("window", hsvFrame);
+            cvWaitKey(1);
             ROS_INFO("xpos: %f\tarea: %f\n", xCenter, area);
         }
     }
