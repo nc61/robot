@@ -88,6 +88,10 @@ int main(int argc, char** argv)
             delayms(REVERSE_FROM_PILE_WAIT_TIME);
             stop();
             state = FIND_BIN;
+		msg.data = state;
+		statePub.publish(msg);
+		area_pile = 0;
+		xpos_pile = 0;
         } else if (state == FIND_BIN) {
             ROS_INFO("Finding bin");
             findBin();
@@ -103,6 +107,10 @@ int main(int argc, char** argv)
             smallMovement(LEFT, PIVOT_FROM_BIN_WAIT_TIME, NO_AVOID);
             last_turn = RIGHT;
             state = FIND_PILE;
+		msg.data = state;
+		statePub.publish(msg);
+		area_bin = 0;
+		xpos_bin = 0;
         }
 
         loop_rate.sleep();
@@ -130,6 +138,7 @@ void navToPile()
 void findPile()
 {
     ros::Rate loop_rate(LOOP_RATE);
+	ros::spinOnce();
     while (ros::ok())
     {
         if (area_pile > AREA_PILE_LOW)
@@ -142,6 +151,7 @@ void findPile()
                     ROS_INFO("Pile close to aligned left");
                     while (xpos_pile < (XPOS_PILE_CENTERED)) 
                     { 
+			ROS_INFO("xpos: %f", xpos_pile);
                         smallMovement(LEFT, FAST, CENTER_PILE_PIVOT_TIME, NO_AVOID);
                         for (int i = 0; i < CENTER_PILE_CYCLES; i++)
                         {
@@ -157,6 +167,7 @@ void findPile()
                 } else {
                     ROS_INFO("Pivoting left looking for pile");
                     sendMotorCommand(PIVOT_LEFT, NORMAL_SPEED);
+			ros::spinOnce();
                 }
             } else if (xpos_pile > XPOS_PILE_CENTERED) {
                 //"almost" centered
@@ -165,11 +176,12 @@ void findPile()
                     ROS_INFO("Pile close to aligned right");
                     while (xpos_pile > (XPOS_PILE_CENTERED)) 
                     { 
+			ROS_INFO("xpos: %f", xpos_pile);
                         smallMovement(RIGHT, FAST, CENTER_PILE_PIVOT_TIME, NO_AVOID);
                         for (int i = 0; i < CENTER_PILE_CYCLES; i++)
                         {
                             ros::spinOnce(); 
-                            if (xpos_pile > XPOS_PILE_CENTERED)
+                            if (xpos_pile < XPOS_PILE_CENTERED)
                                 break;
                             loop_rate.sleep();
                         }
@@ -178,8 +190,10 @@ void findPile()
                     state = NAV_TO_PILE;
                     return;
                 } else {
+		    ROS_INFO("xpos: %f", xpos_pile);
                     ROS_INFO("Pivoting right looking for pile");
                     sendMotorCommand(PIVOT_RIGHT, NORMAL_SPEED);
+			ros::spinOnce();
                 }
             } else {
                 sendMotorCommand(STOP_IMMEDIATELY, 0);
@@ -239,6 +253,9 @@ void navToBin()
             sendMotorCommand(GO_FORWARD, NORMAL_SPEED);
             while (midIR < IR_BIN_DUMP);
             sendMotorCommand(STOP_IMMEDIATELY, 0);
+		area_bin = 0;
+		y_avg_bin = 0;
+		xpos_bin = 0;
             return;
         } else if (y_2 - y_3 > ORIENTATION_THRESHOLD) {
             ROS_INFO("y2 > y3");
@@ -260,6 +277,9 @@ void navToBin()
             sendMotorCommand(GO_FORWARD, NORMAL_SPEED);
             while (midIR < IR_BIN_DUMP) { ros::spinOnce(); }
             sendMotorCommand(STOP_IMMEDIATELY, 0);
+		area_bin = 0;
+		y_avg_bin = 0;
+		xpos_bin = 0;
             return;
         } else {
             sendMotorCommand(GO_FORWARD, NORMAL_SPEED);
@@ -297,6 +317,7 @@ void findBin()
                         state = NAV_TO_BIN;
                         return;
                     }
+		loop_rate.sleep();
                 }
             } else if (xpos_bin > XPOS_BIN_RIGHT_LIMIT) {
                 ROS_INFO("Bin found to right");
@@ -312,6 +333,7 @@ void findBin()
                         state = NAV_TO_BIN;
                         return;
                     }
+		loop_rate.sleep();
                 }
             } else if (xpos_bin < XPOS_BIN_CENTERED) {
                 ROS_INFO("Bin very slightly to the left");
@@ -385,8 +407,12 @@ int avoid_obstacle()
             smallMovement(FORWARD, FAST, AVOID_MOVE_FWD_TIME, AVOID);
             if (state == NAV_TO_BIN) {
                 state = FIND_BIN;
+		xpos_bin = 0;
+		area_bin = 0;
             } else {
                 state = FIND_PILE;
+		xpos_pile = 0;
+		area_pile = 0;
             }
         }
         return 1;
@@ -400,8 +426,12 @@ int avoid_obstacle()
             smallMovement(FORWARD, FAST, AVOID_MOVE_FWD_TIME, AVOID);
             if (state == NAV_TO_BIN) {
                 state = FIND_BIN;
+		xpos_bin = 0;
+		area_bin = 0;
             } else {
                 state = FIND_PILE;
+		xpos_pile = 0;
+		area_pile = 0;
             }
         }
         return 1;
@@ -416,9 +446,13 @@ int avoid_obstacle()
             if (state == NAV_TO_BIN) {
                 ROS_INFO("Back to looking for bin");
                 state = FIND_BIN;
+		xpos_bin = 0;
+		area_bin = 0;
             } else {
                 ROS_INFO("Back to looking for pile");
                 state = FIND_PILE;
+		xpos_pile = 0;
+		area_pile = 0;
             }
         }
         return 1;

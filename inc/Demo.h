@@ -9,8 +9,8 @@
 #define NORMAL_SPEED 65
 #define FAST 70
 #define SLOW_PIVOT_TO_PILE 63
-#define IR_BIN_RIGHT 325
-#define IR_BIN_LEFT 325
+#define IR_BIN_RIGHT 300 
+#define IR_BIN_LEFT 300
 #define IR_BIN_MID 350
 #define IR_BIN_DUMP 500 
 
@@ -22,16 +22,16 @@
 #define DUMP_DIRT_WAIT_TIME 2000
 #define PIVOT_FROM_BIN_WAIT_TIME 2000
 
-#define CENTER_PILE_PIVOT_TIME 100
-#define CENTER_PILE_CYCLES 10
+#define CENTER_PILE_PIVOT_TIME 60
+#define CENTER_PILE_CYCLES 16
 #define NTB_FWD_TIME 300
-#define ALIGN_BIN_PIVOT_TIME 80
-#define BIN_FOUND_PIVOT_TIME 100
+#define ALIGN_BIN_PIVOT_TIME 40
+#define BIN_FOUND_PIVOT_TIME 60
 #define BIN_FOUND_CYCLES 20
-#define BIN_CENTER_PIVOT_TIME 150
-#define BIN_NOT_FOUND_CYCLES 10
-#define BIN_NOT_SEEN_PIVOT_TIME 300
-#define AVOID_MOVE_FWD_TIME 750
+#define BIN_CENTER_PIVOT_TIME 60 
+#define BIN_NOT_FOUND_CYCLES 20
+#define BIN_NOT_SEEN_PIVOT_TIME 200
+#define AVOID_MOVE_FWD_TIME 500
 
 void sendMotorCommand(uint8_t command, uint8_t duty_cycle);
 void sendServoCommand(uint8_t command);

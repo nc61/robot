@@ -177,7 +177,21 @@ int main( int argc, char** argv )
                         && ((msg.y2 - msg.y1)/(msg.y3 - msg.y0) > 5/9) 
                         && ((msg.x1 - msg.x0)/(msg.x2 - msg.x3) < 9/5)
                         && ((msg.x1 - msg.x0)/(msg.x2 - msg.x3) > 5/9) )
-                    objectRecPub.publish(msg);
+                    ObjectRecPub.publish(msg);
+			else 
+			{
+				msg.x0 = 0;
+				msg.x1 = 0;
+				msg.x2 = 0;
+				msg.x3 = 0;
+				msg.y0 = 0;
+				msg.y1 = 0;
+				msg.y2 = 0;
+				msg.y3 = 0;
+				msg.area = area;
+				msg.xpos = xCenter;
+			    ObjectRecPub.publish(msg);
+			}
                     //ROS_INFO("area: %f\txpos: %f", area, xCenter);
                 }
             }

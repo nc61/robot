@@ -3,7 +3,7 @@
 
 #include "std_msgs/UInt8.h"
 
-#define HSV_MIN 153,97,211
+#define HSV_MIN 153,97,140
 #define HSV_MAX 176,219,255
 #define MIN_HESSIAN 500
 #define BLUR_SIZE 3,3
