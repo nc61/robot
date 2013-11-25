@@ -173,10 +173,12 @@ int main( int argc, char** argv )
                     msg.area = area;
                     if ( (msg.x1 > 0 ) && (msg.x2 > 0) && (msg.y2 > 0 ) && (msg.y3 > 0) && (area < 50000) 
                         && (msg.y2 > msg.y1) && (msg.y3 > msg.y0) && (msg.x1 > msg.x0) && (msg.x2 > msg.x3)
-                        && ((msg.y2 - msg.y1)/(msg.y3 - msg.y0) < 2)
-                        && ((msg.y2 - msg.y1)/(msg.y3 - msg.y0) > 1/2) )
+                        && ((msg.y2 - msg.y1)/(msg.y3 - msg.y0) < 9/5)
+                        && ((msg.y2 - msg.y1)/(msg.y3 - msg.y0) > 5/9) 
+                        && ((msg.x1 - msg.x0)/(msg.x2 - msg.x3) < 9/5)
+                        && ((msg.x1 - msg.x0)/(msg.x2 - msg.x3) > 5/9) )
                     objectRecPub.publish(msg);
-                    ROS_INFO("area: %f", area);
+                    //ROS_INFO("area: %f\txpos: %f", area, xCenter);
                 }
             }
         } else if (state == FIND_PILE || state == NAV_TO_PILE) {
@@ -188,16 +190,19 @@ int main( int argc, char** argv )
             cv::Moments colorMoments;
             colorMoments = cv::moments(hsvFrame);
             float xMoment = colorMoments.m10;
+            float yMoment = colorMoments.m01;
             float area = colorMoments.m00;
             float xCenter = xMoment/area;
-
+            float yCenter = yMoment/area;
 
             robot::color msg;
             msg.xpos = xCenter;
+            msg.ypos = yCenter;
             msg.area = area;
-            colorPub.publish(msg);
+            if (yCenter > 55 && area < 30000000)
+                colorPub.publish(msg);
 
-            ROS_INFO("xpos: %f\tarea: %f\n", xCenter, area);
+            //ROS_INFO("xpos: %f\typos: %f\n", xCenter, yCenter);
         }
     }
     return 0;

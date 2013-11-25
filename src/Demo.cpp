@@ -100,7 +100,8 @@ int main(int argc, char** argv)
             delayms(DUMP_DIRT_WAIT_TIME);
             smallMovement(BACKWARD, 1000, NO_AVOID);
             sendServoCommand(SERVO_INIT);
-            smallMovement(!last_turn, PIVOT_FROM_BIN_WAIT_TIME, NO_AVOID);
+            smallMovement(LEFT, PIVOT_FROM_BIN_WAIT_TIME, NO_AVOID);
+            last_turn = RIGHT;
             state = FIND_PILE;
         }
 
@@ -141,7 +142,7 @@ void findPile()
                     ROS_INFO("Pile close to aligned left");
                     while (xpos_pile < (XPOS_PILE_CENTERED)) 
                     { 
-                        smallMovement(RIGHT, FAST, CENTER_PILE_PIVOT_TIME, NO_AVOID);
+                        smallMovement(LEFT, FAST, CENTER_PILE_PIVOT_TIME, NO_AVOID);
                         for (int i = 0; i < CENTER_PILE_CYCLES; i++)
                         {
                             ros::spinOnce(); 
@@ -287,12 +288,15 @@ void findBin()
                 for (int i = 0; i < BIN_FOUND_CYCLES; i++)
                 {
                     ros::spinOnce();
+                    ROS_INFO("xpos: %f\tarea: %f", xpos_bin, area_bin);
                     if (xpos_bin >= XPOS_PILE_CENTERED && area_bin > AREA_BIN_THRESH)
                     {
+                        ROS_INFO("Bin centered");
+                        area_bin = 0;
+                        xpos_bin = 0;
                         state = NAV_TO_BIN;
                         return;
                     }
-                    loop_rate.sleep();
                 }
             } else if (xpos_bin > XPOS_BIN_RIGHT_LIMIT) {
                 ROS_INFO("Bin found to right");
@@ -300,12 +304,14 @@ void findBin()
                 for (int i = 0; i < BIN_FOUND_CYCLES; i++)
                 {
                     ros::spinOnce();
+                    ROS_INFO("xpos: %f\tarea: %f", xpos_bin, area_bin);
                     if (xpos_bin <= XPOS_PILE_CENTERED && area_bin > AREA_BIN_THRESH)
                     {
+                        area_bin = 0;
+                        xpos_bin = 0;
                         state = NAV_TO_BIN;
                         return;
                     }
-                    loop_rate.sleep();
                 }
             } else if (xpos_bin < XPOS_BIN_CENTERED) {
                 ROS_INFO("Bin very slightly to the left");
@@ -313,8 +319,10 @@ void findBin()
                 for (int i = 0; i < BIN_FOUND_CYCLES; i++)
                 {
                     ros::spinOnce();
-                    if (xpos_bin >= XPOS_PILE_CENTERED && area_bin > AREA_BIN_THRESH)
+                    if (xpos_bin >= XPOS_BIN_CENTERED && area_bin > AREA_BIN_THRESH)
                     {
+                        area_bin = 0;
+                        xpos_bin = 0;
                         state = NAV_TO_BIN;
                         return;
                     }
@@ -326,8 +334,10 @@ void findBin()
                 for (int i = 0; i < BIN_FOUND_CYCLES; i++)
                 {
                     ros::spinOnce();
-                    if (xpos_bin <= XPOS_PILE_CENTERED && area_bin > AREA_BIN_THRESH)
+                    if (xpos_bin <= XPOS_BIN_CENTERED && area_bin > AREA_BIN_THRESH)
                     {
+                        area_bin = 0;
+                        xpos_bin = 0;
                         state = NAV_TO_BIN;
                         return;
                     }
