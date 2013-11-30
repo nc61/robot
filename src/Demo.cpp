@@ -102,8 +102,9 @@ int main(int argc, char** argv)
             delayms(PREPARE_DUMP_WAIT_TIME);
             sendServoCommand(DUMP_DIRT);
             delayms(DUMP_DIRT_WAIT_TIME);
-            smallMovement(BACKWARD, 1000, NO_AVOID);
+            smallMovement(BACKWARD, 500, NO_AVOID);
             sendServoCommand(SERVO_INIT);
+	    smallMovement(BACKWARD, 1000, NO_AVOID);
             smallMovement(LEFT, PIVOT_FROM_BIN_WAIT_TIME, NO_AVOID);
             last_turn = RIGHT;
             state = FIND_PILE;
@@ -404,7 +405,7 @@ int avoid_obstacle()
         while (midIR > MID_VF){ ros::spinOnce(); }
         if (state == NAV_TO_PILE || state == NAV_TO_BIN)
         {
-            smallMovement(FORWARD, FAST, AVOID_MOVE_FWD_TIME, AVOID);
+            smallMovement(FORWARD, NORMAL_SPEED, AVOID_MOVE_FWD_TIME, AVOID);
             if (state == NAV_TO_BIN) {
                 state = FIND_BIN;
 		xpos_bin = 0;
@@ -423,7 +424,7 @@ int avoid_obstacle()
         last_turn = RIGHT;
         if (state == NAV_TO_PILE || state == NAV_TO_BIN)
         {
-            smallMovement(FORWARD, FAST, AVOID_MOVE_FWD_TIME, AVOID);
+            smallMovement(FORWARD, NORMAL_SPEED, AVOID_MOVE_FWD_TIME, AVOID);
             if (state == NAV_TO_BIN) {
                 state = FIND_BIN;
 		xpos_bin = 0;
@@ -442,7 +443,7 @@ int avoid_obstacle()
         last_turn = LEFT;
         if (state == NAV_TO_PILE || state == NAV_TO_BIN)
         {
-            smallMovement(FORWARD, FAST, AVOID_MOVE_FWD_TIME, AVOID);
+            smallMovement(FORWARD, NORMAL_SPEED, AVOID_MOVE_FWD_TIME, AVOID);
             if (state == NAV_TO_BIN) {
                 ROS_INFO("Back to looking for bin");
                 state = FIND_BIN;

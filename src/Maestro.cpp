@@ -61,7 +61,7 @@ int main(int argc, char** argv)
         msg.FSR = readPin(SENSOR_FSR_PIN);
         
 //        ROS_INFO("Left: %d\tMid: %d\tRight: %d", msg.leftIR, msg.midIR, msg.rightIR);
-//        ROS_INFO("FSR: %d\n", msg.FSR);
+ //       ROS_INFO("FSR: %d\n", msg.FSR);
         sensorPub.publish(msg);
         loop_rate.sleep();
     }
