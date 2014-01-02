@@ -10,7 +10,7 @@ find_package(OpenCV REQUIRED)
 
 ## Declare ROS messages and services
 add_message_files(DIRECTORY msg FILES pile.msg sensors.msg motor.msg color.msg
-    object.msg)
+    object.msg controller.msg)
 
 ## Generate added messages and services
 generate_messages(DEPENDENCIES std_msgs)
@@ -19,7 +19,7 @@ catkin_package(
 	CATKIN_DEPENDS message_runtime
 )
 
-include_directories(include ${catkin_INCLUDE_DIRS} /home/linaro/catkin_ws/src/robot/inc/)
+include_directories(include ${catkin_INCLUDE_DIRS} /home/nick/catkin_ws/src/robot/inc/)
 
 #Main programs
 add_executable(Maestro src/Maestro.cpp)

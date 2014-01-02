@@ -49,6 +49,7 @@ void navToBin();
 void findBin();
 void smallMovement(uint8_t direction, uint16_t interval, uint8_t avoid);
 void smallMovement(uint8_t direction, uint8_t duty_cycle, uint16_t interval, uint8_t avoid);
+void clearCameraBuffers();
 
 
 #endif

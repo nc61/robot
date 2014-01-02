@@ -13,7 +13,7 @@
 
 ros::Publisher objectRecPub;
 ros::Publisher colorPub;
-uint8_t state = FIND_PILE;
+uint8_t state = FIND_BIN;
 
 int main( int argc, char** argv )
 {
@@ -34,7 +34,7 @@ int main( int argc, char** argv )
     cv::Mat img_scene, img_object;
     cv::Mat hsvFrame, bgrFrame;
     
-    img_object = cv::imread("/home/linaro/img/dew.bmp", CV_LOAD_IMAGE_GRAYSCALE );
+    img_object = cv::imread("/home/nick/img/dew.bmp", CV_LOAD_IMAGE_GRAYSCALE );
     
     if(!img_object.data)
     { 
@@ -68,7 +68,7 @@ int main( int argc, char** argv )
 
     
     //Open up video stream
-    cv::VideoCapture capture(1);
+    cv::VideoCapture capture(0);
     if (!capture.isOpened())
     {
         ROS_FATAL("Error opening camera");
@@ -105,7 +105,7 @@ int main( int argc, char** argv )
                 std::vector<cv::DMatch> matches;
                 matcher.match(descriptors_object, descriptors_scene, matches);
                 
-//                ROS_INFO("time: %ld", time(NULL));
+                //ROS_INFO("time: %ld", time(NULL));
                 //Calculate minimum and maximum distances    
                 double max_dist = 0; 
                 double min_dist = 100;
@@ -143,16 +143,14 @@ int main( int argc, char** argv )
                     std::vector<cv::Point2f> scene_corners(4);
                     cv::perspectiveTransform(obj_corners, scene_corners, H);
 
-         /*           
                     line( img_scene, scene_corners[0], 
-                          scene_corners[1], Scalar(0, 255, 0), 4 );
+                          scene_corners[1], cv::Scalar(0, 255, 0), 4 );
                     line( img_scene, scene_corners[1], 
-                            scene_corners[2], Scalar( 0, 255, 0), 4 );
+                            scene_corners[2], cv::Scalar( 0, 255, 0), 4 );
                     line( img_scene, scene_corners[2], 
-                            scene_corners[3], Scalar( 0, 255, 0), 4 );
+                            scene_corners[3], cv::Scalar( 0, 255, 0), 4 );
                     line( img_scene, scene_corners[3], 
-                            scene_corners[0], Scalar( 0, 255, 0), 4 );
-            */
+                            scene_corners[0], cv::Scalar( 0, 255, 0), 4 );
                    
                     float xCenter = (scene_corners[0].x + scene_corners[2].x)/2;
                     float area = abs(scene_corners[0].x - scene_corners[2].x)*abs(scene_corners[0].y - scene_corners[3].y);
@@ -173,13 +171,22 @@ int main( int argc, char** argv )
                     msg.area = area;
                     if ( (msg.x1 > 0 ) && (msg.x2 > 0) && (msg.y2 > 0 ) && (msg.y3 > 0) && (area < 50000) 
                         && (msg.y2 > msg.y1) && (msg.y3 > msg.y0) && (msg.x1 > msg.x0) && (msg.x2 > msg.x3)
-                        && ((msg.y2 - msg.y1)/(msg.y3 - msg.y0) < 9/5)
-                        && ((msg.y2 - msg.y1)/(msg.y3 - msg.y0) > 5/9) 
-                        && ((msg.x1 - msg.x0)/(msg.x2 - msg.x3) < 9/5)
-                        && ((msg.x1 - msg.x0)/(msg.x2 - msg.x3) > 5/9) )
-                    objectRecPub.publish(msg);
-                    //ROS_INFO("area: %f\txpos: %f", area, xCenter);
+                        && ((msg.y2 - msg.y1)/(msg.y3 - msg.y0) < 4)
+                        && ((msg.y2 - msg.y1)/(msg.y3 - msg.y0) > 1/4) 
+                        && ((msg.x1 - msg.x0)/(msg.x2 - msg.x3) < 4)
+                        && ((msg.x1 - msg.x0)/(msg.x2 - msg.x3) > 1/4) )
+                    {
+                        objectRecPub.publish(msg);
+                        cv::imshow("scene", img_scene);
+                        cvWaitKey(1);
+                    }
+                } else {
+                    cv::imshow("scene", img_scene);
+                    cvWaitKey(1);
                 }
+            } else {
+                cv::imshow("scene", img_scene);
+                cvWaitKey(1);
             }
         } else if (state == FIND_PILE || state == NAV_TO_PILE) {
             
@@ -201,8 +208,6 @@ int main( int argc, char** argv )
             msg.area = area;
             if (yCenter > 55 && area < 30000000)
                 colorPub.publish(msg);
-
-            //ROS_INFO("xpos: %f\typos: %f\n", xCenter, yCenter);
         }
     }
     return 0;

@@ -1,0 +1,4 @@
+uint8 left_duty_cycle
+uint8 left_direction
+uint8 right_duty_cycle
+uint8 right_direction

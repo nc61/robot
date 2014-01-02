@@ -36,6 +36,7 @@ int main(int argc, char** argv)
     init_delay.sleep();
     //Subscribers
     ros::Subscriber motorCommand = nh.subscribe<robot::motor>("motor_command", 1000, motorCallback);
+    ros::Subscriver controllerCommand = nh.subscribe<robot::controller>("controller", 1, controllerCallback)
     init_delay.sleep();
     
     while(ros::ok()){
@@ -61,6 +62,17 @@ int main(int argc, char** argv)
     char cmd_stop_motors[] = {'s', 'n'};
     xmega.write(cmd_stop_motors, sizeof(cmd_stop_motors));
 
+}
+
+void controllerCallback(const robot::controller::ConstPtr &msg)
+{
+    uint8_t left_duty_cycle = msg->left_duty_cycle;
+    uint8_t left_direction = msg->left_direction;
+    uint8_t right_duty_cycle = msg->right_duty_cycle;
+    uint8_t right_direction = msg->right_direction;
+
+    char cmd[] = {'c', left_duty_cycle, left_direction, right_duty_cycle, right_direction};
+    xmega.write(cmd, sizeof(cmd));
 }
 
 void motorCallback(const robot::motor::ConstPtr &msg)
